@@ -10,14 +10,15 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "<3.13,>=3.8.0"
+python = "<3.13,>=3.9.0"
 beir = "^2.0.0"
 fastembed = {git = "git@github.com:qdrant/fastembed.git", rev = "main"}
-qdrant-client = {git = "git@github.com:qdrant/qdrant-client.git", rev = "fix-query-checks"}
+qdrant-client = {git = "git@github.com:qdrant/qdrant-client.git", rev = "dev"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
 ruff = "^0.4.10"
+pre-commit = "^3.7.1"
 
 [tool.pytest.ini_options]
 minversion = "7.1"

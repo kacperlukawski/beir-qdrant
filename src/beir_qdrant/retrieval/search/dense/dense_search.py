@@ -1,9 +1,9 @@
 import uuid
-from typing import List, Dict
+from typing import Dict, List
 
 from beir.retrieval.search import BaseSearch
 from fastembed import TextEmbedding
-from qdrant_client import models, QdrantClient
+from qdrant_client import QdrantClient, models
 
 from beir_qdrant.retrieval.search.qdrant import QdrantBase
 

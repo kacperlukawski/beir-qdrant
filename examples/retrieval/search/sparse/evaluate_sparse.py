@@ -1,6 +1,6 @@
 import logging
 
-from beir import util, LoggingHandler
+from beir import LoggingHandler, util
 from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient

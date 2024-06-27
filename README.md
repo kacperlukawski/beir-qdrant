@@ -33,8 +33,8 @@ qdrant_client = QdrantClient("http://localhost:6333")
 
 # Create the retriever and evaluate it on the test set
 model = DenseQdrantSearch(
-    qdrant_client, 
-    collection_name="scifact-all-MiniLM-L6-v2", 
+    qdrant_client,
+    collection_name="scifact-all-MiniLM-L6-v2",
     dense_model_name="sentence-transformers/all-MiniLM-L6-v2",
     initialize=True,
 )
@@ -51,4 +51,4 @@ Qdrant supports different search modes, including:
 - Dense search: `beir_qdrant.retrieval.search.dense.DenseQdrantSearch`
 - Sparse search: `beir_qdrant.retrieval.search.sparse.SparseQdrantSearch`
 - BM42 search: `beir_qdrant.retrieval.search.sparse.BM42Search`
-- 
+-

@@ -7,7 +7,6 @@ from qdrant_client import QdrantClient, models
 
 from beir_qdrant.retrieval.search.qdrant import QdrantBase
 
-
 logger = logging.getLogger(__name__)
 
 

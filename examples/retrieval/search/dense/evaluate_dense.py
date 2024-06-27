@@ -1,6 +1,6 @@
 import logging
 
-from beir import util, LoggingHandler
+from beir import LoggingHandler, util
 from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient
@@ -30,7 +30,9 @@ qdrant_client = QdrantClient("http://localhost:6333")
 
 # Create the retriever and evaluate it on the test set
 model = DenseQdrantSearch(
-    qdrant_client, collection_name="scifact-all-MiniLM-L6-v2", initialize=True,
+    qdrant_client,
+    collection_name="scifact-all-MiniLM-L6-v2",
+    initialize=True,
 )
 retriever = EvaluateRetrieval(model)
 results = retriever.retrieve(corpus, queries)

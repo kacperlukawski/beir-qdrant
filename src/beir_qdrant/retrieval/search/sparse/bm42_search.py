@@ -1,6 +1,7 @@
 import logging
 
 from qdrant_client import QdrantClient
+
 from beir_qdrant.retrieval.search.sparse.sparse_search import SparseQdrantSearch
 
 logger = logging.getLogger(__name__)
