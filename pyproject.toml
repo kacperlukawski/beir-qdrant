@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "beir-qdrant"
+version = "0.0.1"
+description = "Qdrant integration with BEIR, simplifying quality checks on standard datasets"
+authors = ["Kacper Łukawski <kacper.lukawski@qdrant.com>"]
+readme = "README.md"
+license = "Apache 2.0"
+packages = [
+    { include = "beir_qdrant", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "<3.13,>=3.8.0"
+beir = "^2.0.0"
+fastembed = {git = "git@github.com:qdrant/fastembed.git", rev = "main"}
+qdrant-client = {git = "git@github.com:qdrant/qdrant-client.git", rev = "fix-query-checks"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+ruff = "^0.4.10"
+
+[tool.pytest.ini_options]
+minversion = "7.1"
+pythonpath = [
+    "src/"
+]
+testpaths = [
+    "tests/"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
