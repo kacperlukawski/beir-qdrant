@@ -2,31 +2,35 @@ import uuid
 from typing import Any, Dict, List
 
 from beir.retrieval.search import BaseSearch
-from fastembed import TextEmbedding
+from fastembed import LateInteractionTextEmbedding
 from qdrant_client import QdrantClient, models
 
 from beir_qdrant.retrieval.search.qdrant import QdrantBase
 
 
-class DenseQdrantSearch(QdrantBase, BaseSearch):
+class LateInteractionQdrantSearch(QdrantBase, BaseSearch):
     """
-    Dense search using Qdrant and FastEmbed model. By default, it uses all-miniLM-L6-v2 model for dense text embeddings.
+    Late interaction search using Qdrant, for models like COLBERT.
     """
+
+    BATCH_SIZE = 4
 
     def __init__(
         self,
         qdrant_client: QdrantClient,
         collection_name: str,
-        vector_name: str = "sparse",
+        vector_name: str = "late_interaction",
         initialize: bool = True,
-        dense_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
+        late_interaction_model_name: str = "colbert-ir/colbertv2.0",
     ):
         super().__init__(qdrant_client, collection_name, vector_name, initialize)
-        self.model = TextEmbedding(model_name=dense_model_name)
+        self.model = LateInteractionTextEmbedding(
+            model_name=late_interaction_model_name
+        )
 
     def collection_config(self) -> Dict[str, Any]:
         test_embedding = next(self.model.query_embed("test"))
-        embedding_size = len(test_embedding)
+        embedding_size = test_embedding.shape[1]
 
         return dict(
             collection_name=self.collection_name,
@@ -34,6 +38,9 @@ class DenseQdrantSearch(QdrantBase, BaseSearch):
                 self.vector_name: models.VectorParams(
                     size=embedding_size,
                     distance=models.Distance.COSINE,
+                    multivector_config=models.MultiVectorConfig(
+                        comparator=models.MultiVectorComparator.MAX_SIM
+                    ),
                 )
             },
         )
@@ -48,16 +55,12 @@ class DenseQdrantSearch(QdrantBase, BaseSearch):
 
     def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
         query_embedding = next(self.model.query_embed(query)).tolist()
-        return self.qdrant_client.search(
+        query_response = self.qdrant_client.query_points(
             self.collection_name,
-            query_vector=models.NamedVector(
-                name=self.vector_name,
-                vector=query_embedding,
-            ),
+            query=query_embedding,
+            using=self.vector_name,
             limit=limit,
             with_payload=True,
             with_vectors=False,
         )
-
-    def _str_params(self) -> List[str]:
-        return super()._str_params() + [f"dense_model_name={self.model.model_name}"]
+        return query_response.points

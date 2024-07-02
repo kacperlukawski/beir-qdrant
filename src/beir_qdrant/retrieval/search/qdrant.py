@@ -1,7 +1,7 @@
 import abc
 import logging
 import time
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from qdrant_client import QdrantClient, models
 from tqdm import tqdm
@@ -15,6 +15,7 @@ class QdrantBase(abc.ABC):
     """
 
     SLEEP_INTERVAL = 1.0
+    BATCH_SIZE = 64
 
     def __init__(
         self,
@@ -64,12 +65,22 @@ class QdrantBase(abc.ABC):
         self.qdrant_client.upload_points(
             collection_name=self.collection_name,
             points=points,
+            batch_size=self.BATCH_SIZE,
         )
 
-    @abc.abstractmethod
     def recreate_collection(self):
         """
         Create a collection in Qdrant. If it already exists, delete it and create a new one.
+        :return:
+        """
+        collection_config = self.collection_config()
+        self.qdrant_client.delete_collection(self.collection_name)
+        self.qdrant_client.create_collection(**collection_config)
+
+    @abc.abstractmethod
+    def collection_config(self) -> Dict[str, Any]:
+        """
+        Return the configuration for the collection.
         :return:
         """
         raise NotImplementedError
@@ -106,3 +117,11 @@ class QdrantBase(abc.ABC):
             logger.info(f"Collection status: {collection_info.status}")
             time.sleep(self.SLEEP_INTERVAL)
             collection_info = self.qdrant_client.get_collection(self.collection_name)
+
+    def __str__(self):
+        return f"{self.__class__.__name__}({', '.join(self._str_params())})"
+
+    def _str_params(self) -> List[str]:
+        return [
+            f"collection_name={self.collection_name}",
+        ]

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beir-qdrant"
-version = "0.0.1"
+version = "0.1.0"
 description = "Qdrant integration with BEIR, simplifying quality checks on standard datasets"
 authors = ["Kacper Łukawski <kacper.lukawski@qdrant.com>"]
 readme = "README.md"
@@ -12,8 +12,8 @@ packages = [
 [tool.poetry.dependencies]
 python = "<3.13,>=3.9.0"
 beir = "^2.0.0"
-fastembed = {git = "git@github.com:qdrant/fastembed.git", rev = "main"}
-qdrant-client = {git = "git@github.com:qdrant/qdrant-client.git", rev = "dev"}
+fastembed = "^0.3.1"
+qdrant-client = "^1.10.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"

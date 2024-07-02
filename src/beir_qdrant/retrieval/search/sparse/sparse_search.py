@@ -1,5 +1,6 @@
 import logging
-from typing import Dict, List
+import uuid
+from typing import Any, Dict, List
 
 from beir.retrieval.search import BaseSearch
 from fastembed import SparseTextEmbedding
@@ -26,9 +27,8 @@ class SparseQdrantSearch(QdrantBase, BaseSearch):
         super().__init__(qdrant_client, collection_name, vector_name, initialize)
         self.model = SparseTextEmbedding(model_name=sparse_model_name)
 
-    def recreate_collection(self):
-        self.qdrant_client.delete_collection(self.collection_name)
-        self.qdrant_client.create_collection(
+    def collection_config(self) -> Dict[str, Any]:
+        return dict(
             collection_name=self.collection_name,
             vectors_config={},
             sparse_vectors_config={
@@ -41,7 +41,7 @@ class SparseQdrantSearch(QdrantBase, BaseSearch):
     def doc_to_point(self, doc_id: str, doc: Dict[str, str]) -> models.PointStruct:
         doc_embedding = next(self.model.embed(doc["text"])).as_object()
         return models.PointStruct(
-            id=doc_id,
+            id=uuid.uuid4().hex,
             vector={self.vector_name: models.SparseVector(**doc_embedding)},
             payload={"doc_id": doc_id, **doc},
         )
@@ -58,3 +58,6 @@ class SparseQdrantSearch(QdrantBase, BaseSearch):
             with_payload=True,
             with_vectors=False,
         )
+
+    def _str_params(self) -> List[str]:
+        return super()._str_params() + [f"sparse_model_name={self.model.model_name}"]

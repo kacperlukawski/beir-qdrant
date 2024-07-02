@@ -12,7 +12,7 @@ pip install beir-qdrant
 ## Quick Example
 
 The following example demonstrates how to use BEIR with Qdrant dense search. The example uses the SciFact dataset
-and `all-MiniLM-L6-v2` model from Sentence Transformers to generate the embeddings.
+and `all-MiniLM-L6-v2` model from Sentence Transformers to generate the dense embeddings.
 
 ```python
 from beir import util
@@ -44,6 +44,9 @@ results = retriever.retrieve(corpus, queries)
 ndcg, _map, recall, precision = retriever.evaluate(qrels, results, retriever.k_values)
 ```
 
+The example above demonstrates how to use the dense embeddings, but changing the search mode is as simple as changing
+the model implementation.
+
 ## Supported Modes
 
 Qdrant supports different search modes, including:
@@ -51,3 +54,4 @@ Qdrant supports different search modes, including:
 - Dense search: `beir_qdrant.retrieval.search.dense.DenseQdrantSearch`
 - Sparse search: `beir_qdrant.retrieval.search.sparse.SparseQdrantSearch`
 - BM42 search: `beir_qdrant.retrieval.search.sparse.BM42Search`
+- Late interaction: `beir_qdrant.retrieval.search.late_interaction.LateInteractionQdrantSearch`
