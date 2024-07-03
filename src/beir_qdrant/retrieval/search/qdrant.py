@@ -21,12 +21,10 @@ class QdrantBase(abc.ABC):
         self,
         qdrant_client: QdrantClient,
         collection_name: str,
-        vector_name: str,
         initialize: bool = True,
     ):
         self.qdrant_client = qdrant_client
         self.collection_name = collection_name
-        self.vector_name = vector_name
         self.initialize = initialize
 
     def search(
@@ -125,3 +123,27 @@ class QdrantBase(abc.ABC):
         return [
             f"collection_name={self.collection_name}",
         ]
+
+
+class SingleVectorQdrantBase(QdrantBase):
+    """
+    Base class for Qdrant based search with a single vector.
+    """
+
+    def __init__(
+        self,
+        qdrant_client: QdrantClient,
+        collection_name: str,
+        initialize: bool = True,
+        vector_name: str = "vector",
+    ):
+        super().__init__(qdrant_client, collection_name, initialize)
+        self.vector_name = vector_name
+
+    @abc.abstractmethod
+    def create_document_vector(self, document: str) -> models.Vector:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def create_query_vector(self, query: str) -> models.Vector:
+        raise NotImplementedError

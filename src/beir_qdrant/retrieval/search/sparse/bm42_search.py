@@ -17,14 +17,14 @@ class BM42Search(SparseQdrantSearch):
         self,
         qdrant_client: QdrantClient,
         collection_name: str,
-        vector_name: str = "bm42",
         initialize: bool = True,
+        vector_name: str = "bm42",
         attention_model_name: str = "Qdrant/bm42-all-minilm-l6-v2-attentions",
     ):
         super().__init__(
             qdrant_client,
             collection_name,
-            vector_name,
             initialize,
+            vector_name,
             attention_model_name,
         )
