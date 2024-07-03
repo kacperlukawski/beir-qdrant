@@ -59,12 +59,20 @@ class QdrantBase(abc.ABC):
         points = []
         for doc_id, doc in tqdm(corpus.items(), desc="Corpus indexing"):
             points.append(self.doc_to_point(doc_id, doc))
+            if len(points) >= self.BATCH_SIZE:
+                self.qdrant_client.upload_points(
+                    collection_name=self.collection_name,
+                    points=points,
+                    batch_size=self.BATCH_SIZE,
+                )
+                points = []
 
-        self.qdrant_client.upload_points(
-            collection_name=self.collection_name,
-            points=points,
-            batch_size=self.BATCH_SIZE,
-        )
+        if len(points) > 0:
+            self.qdrant_client.upload_points(
+                collection_name=self.collection_name,
+                points=points,
+                batch_size=self.BATCH_SIZE,
+            )
 
     def recreate_collection(self):
         """
