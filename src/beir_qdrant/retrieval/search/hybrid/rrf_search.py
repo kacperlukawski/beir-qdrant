@@ -26,5 +26,7 @@ class RRFHybridQdrantSearch(HybridQdrantSearch):
                 fusion=models.Fusion.RRF,
             ),
             limit=limit,
+            with_payload=True,
+            with_vectors=False,
         )
         return results.points

@@ -52,19 +52,6 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             payload={"doc_id": doc_id, **doc},
         )
 
-    def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
-        query_embedding = self.model.embed_query(query)
-        return self.qdrant_client.search(
-            self.collection_name,
-            query_vector=models.NamedSparseVector(
-                name=self.vector_name,
-                vector=query_embedding,
-            ),
-            limit=limit,
-            with_payload=True,
-            with_vectors=False,
-        )
-
     def _str_params(self) -> List[str]:
         return super()._str_params() + [
             f"model={self.model}",

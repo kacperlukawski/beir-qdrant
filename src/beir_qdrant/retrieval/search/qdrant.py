@@ -153,3 +153,15 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         super().__init__(qdrant_client, collection_name, initialize)
         self.model = model
         self.vector_name = vector_name
+
+    def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
+        query_embedding = self.model.embed_query(query)
+        result = self.qdrant_client.query_points(
+            self.collection_name,
+            query=query_embedding,
+            using=self.vector_name,
+            limit=limit,
+            with_payload=True,
+            with_vectors=False,
+        )
+        return result.points

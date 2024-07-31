@@ -66,18 +66,6 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             payload={"doc_id": doc_id, **doc},
         )
 
-    def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
-        query_embedding = self.model.embed_query(query)
-        query_response = self.qdrant_client.query_points(
-            self.collection_name,
-            query=query_embedding,
-            using=self.vector_name,
-            limit=limit,
-            with_payload=True,
-            with_vectors=False,
-        )
-        return query_response.points
-
     def _str_params(self) -> List[str]:
         return super()._str_params() + [
             f"model={self.model}",
