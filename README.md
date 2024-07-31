@@ -20,6 +20,7 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient
 
+from beir_qdrant.retrieval.model_adapter.fastembed import DenseFastEmbedModelAdapter
 from beir_qdrant.retrieval.search.dense import DenseQdrantSearch
 
 # Download and load the dataset
@@ -31,11 +32,14 @@ corpus, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="te
 # Connect to Qdrant running on localhost
 qdrant_client = QdrantClient("http://localhost:6333")
 
-# Create the retriever and evaluate it on the test set
+# Create the retriever and evaluate it on the test set using
+# one of the sentence-transformers models available in FastEmbed
 model = DenseQdrantSearch(
     qdrant_client,
+    model=DenseFastEmbedModelAdapter(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    ),
     collection_name="scifact-all-MiniLM-L6-v2",
-    dense_model_name="sentence-transformers/all-MiniLM-L6-v2",
     initialize=True,
 )
 retriever = EvaluateRetrieval(model)

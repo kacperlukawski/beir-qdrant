@@ -1,5 +1,5 @@
-from .late_interaction_search import LateInteractionQdrantSearch
+from .late_interaction_search import MultiVectorQdrantSearch
 
 __all__ = [
-    "LateInteractionQdrantSearch",
+    "MultiVectorQdrantSearch",
 ]

@@ -2,13 +2,13 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 from beir.retrieval.search import BaseSearch
-from fastembed import TextEmbedding
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.search.qdrant import SingleVectorQdrantBase
+from beir_qdrant.retrieval.model_adapter.base import BaseDenseModelAdapter
+from beir_qdrant.retrieval.search.qdrant import SingleNamedVectorQdrantBase
 
 
-class DenseQdrantSearch(SingleVectorQdrantBase, BaseSearch):
+class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     """
     Dense search using Qdrant and FastEmbed model. By default, it uses all-miniLM-L6-v2 model for dense text embeddings.
     """
@@ -16,19 +16,19 @@ class DenseQdrantSearch(SingleVectorQdrantBase, BaseSearch):
     def __init__(
         self,
         qdrant_client: QdrantClient,
+        model: BaseDenseModelAdapter,
         collection_name: str,
         initialize: bool = True,
         vector_name: str = "sparse",
-        dense_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
         distance: models.Distance = models.Distance.COSINE,
         hnsw_config: Optional[models.HnswConfigDiff] = None,
         quantization_config: Optional[models.QuantizationConfig] = None,
         on_disk: Optional[bool] = None,
         datatype: Optional[models.Datatype] = None,
     ):
-        super().__init__(qdrant_client, collection_name, initialize)
+        super().__init__(qdrant_client, model, collection_name, initialize)  # noqa
+        self.model = model
         self.vector_name = vector_name
-        self.model = TextEmbedding(model_name=dense_model_name)
         self.distance = distance
         self.hnsw_config = hnsw_config
         self.quantization_config = quantization_config
@@ -36,7 +36,7 @@ class DenseQdrantSearch(SingleVectorQdrantBase, BaseSearch):
         self.datatype = datatype
 
     def collection_config(self) -> Dict[str, Any]:
-        test_embedding = next(self.model.query_embed("test"))
+        test_embedding = self.model.embed_query("test")
         embedding_size = len(test_embedding)
 
         return dict(
@@ -54,7 +54,7 @@ class DenseQdrantSearch(SingleVectorQdrantBase, BaseSearch):
         )
 
     def doc_to_point(self, doc_id: str, doc: Dict[str, str]) -> models.PointStruct:
-        doc_embedding = self.create_document_vector(doc["text"])
+        doc_embedding = self.model.embed_document(doc["text"])
         return models.PointStruct(
             id=uuid.uuid4().hex,
             vector={self.vector_name: doc_embedding},
@@ -62,7 +62,7 @@ class DenseQdrantSearch(SingleVectorQdrantBase, BaseSearch):
         )
 
     def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
-        query_embedding = self.create_query_vector(query)
+        query_embedding = self.model.embed_query(query)
         return self.qdrant_client.search(
             self.collection_name,
             query_vector=models.NamedVector(
@@ -74,16 +74,10 @@ class DenseQdrantSearch(SingleVectorQdrantBase, BaseSearch):
             with_vectors=False,
         )
 
-    def create_document_vector(self, document: str) -> models.Vector:
-        return next(self.model.passage_embed([document])).tolist()  # noqa
-
-    def create_query_vector(self, query: str) -> models.Vector:
-        return next(self.model.query_embed(query)).tolist()  # noqa
-
     def _str_params(self) -> List[str]:
         return super()._str_params() + [
+            f"model={self.model}",
             f"vector_name={self.vector_name}",
-            f"dense_model_name={self.model.model_name}",
             f"distance={self.distance}",
             f"hnsw_config={self.hnsw_config}",
             f"quantization_config={self.quantization_config}",

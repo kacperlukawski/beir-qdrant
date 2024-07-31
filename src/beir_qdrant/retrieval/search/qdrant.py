@@ -6,6 +6,8 @@ from typing import Any, Dict, List
 from qdrant_client import QdrantClient, models
 from tqdm import tqdm
 
+from beir_qdrant.retrieval.model_adapter.base import BaseModelAdapter
+
 logger = logging.getLogger(__name__)
 
 
@@ -133,25 +135,21 @@ class QdrantBase(abc.ABC):
         ]
 
 
-class SingleVectorQdrantBase(QdrantBase):
+class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
     """
-    Base class for Qdrant based search with a single vector.
+    Base class for Qdrant based search with a single vector. Single vector means here, a single named vector of a point.
+    Even if it contains multiple token-level embeddings, we still think of it as a single vector. Contrast this with
+    hybrid search, where we have multiple named vectors used downstream.
     """
 
     def __init__(
         self,
         qdrant_client: QdrantClient,
+        model: BaseModelAdapter,
         collection_name: str,
         initialize: bool = True,
         vector_name: str = "vector",
     ):
         super().__init__(qdrant_client, collection_name, initialize)
+        self.model = model
         self.vector_name = vector_name
-
-    @abc.abstractmethod
-    def create_document_vector(self, document: str) -> models.Vector:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def create_query_vector(self, query: str) -> models.Vector:
-        raise NotImplementedError

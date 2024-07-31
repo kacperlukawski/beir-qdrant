@@ -3,10 +3,15 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient, models
 
+from beir_qdrant.retrieval.model_adapter.fastembed import (
+    DenseFastEmbedModelAdapter,
+    MultiVectorFastEmbedModelAdapter,
+    SparseFastEmbedModelAdapter,
+)
 from beir_qdrant.retrieval.search.dense import DenseQdrantSearch
 from beir_qdrant.retrieval.search.hybrid import RRFHybridQdrantSearch
-from beir_qdrant.retrieval.search.late_interaction import LateInteractionQdrantSearch
-from beir_qdrant.retrieval.search.sparse import BM42Search, SparseQdrantSearch
+from beir_qdrant.retrieval.search.late_interaction import MultiVectorQdrantSearch
+from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
 
 # Download and load the dataset
 dataset = "scifact"
@@ -25,30 +30,32 @@ qdrant_client = QdrantClient("http://localhost:6333")
 searches = [
     DenseQdrantSearch(
         qdrant_client,
+        model=DenseFastEmbedModelAdapter(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        ),
         collection_name="scifact-all-MiniLM-L6-v2",
         vector_name="all-MiniLM-L6-v2",
-        dense_model_name="sentence-transformers/all-MiniLM-L6-v2",
         quantization_config=models.BinaryQuantization(
             binary=models.BinaryQuantizationConfig(always_ram=True)
         ),
     ),
     SparseQdrantSearch(
         qdrant_client,
+        model=SparseFastEmbedModelAdapter(model_name="prithvida/Splade_PP_en_v1"),
         collection_name="scifact-splade",
         vector_name="splade",
-        sparse_model_name="prithvida/Splade_PP_en_v1",
     ),
-    BM42Search(
+    SparseQdrantSearch(
         qdrant_client,
+        model=SparseFastEmbedModelAdapter("Qdrant/bm42-all-minilm-l6-v2-attentions"),
         collection_name="scifact-bm42",
         vector_name="bm42",
-        attention_model_name="Qdrant/bm42-all-minilm-l6-v2-attentions",
     ),
-    LateInteractionQdrantSearch(
+    MultiVectorQdrantSearch(
         qdrant_client,
+        model=MultiVectorFastEmbedModelAdapter(model_name="colbert-ir/colbertv2.0"),
         collection_name="scifact-colbert",
         vector_name="colbert",
-        late_interaction_model_name="colbert-ir/colbertv2.0",
     ),
 ]
 

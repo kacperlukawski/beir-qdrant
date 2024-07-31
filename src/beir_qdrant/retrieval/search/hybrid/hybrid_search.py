@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from beir.retrieval.search import BaseSearch
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.search.qdrant import QdrantBase, SingleVectorQdrantBase
+from beir_qdrant.retrieval.search.qdrant import QdrantBase, SingleNamedVectorQdrantBase
 
 
 class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
@@ -21,7 +21,7 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
         qdrant_client: QdrantClient,
         collection_name: str,
         initialize: bool = True,
-        searches: Optional[Iterable[SingleVectorQdrantBase]] = None,
+        searches: Optional[Iterable[SingleNamedVectorQdrantBase]] = None,
     ):
         super().__init__(qdrant_client, collection_name, initialize)
         self.inner_searches = searches or []

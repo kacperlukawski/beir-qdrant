@@ -13,7 +13,7 @@ class RRFHybridQdrantSearch(HybridQdrantSearch):
     def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
         prefetch = [
             models.Prefetch(
-                query=search.create_query_vector(query),
+                query=search.model.embed_query(query),
                 using=search.vector_name,
                 limit=limit,
             )
