@@ -21,7 +21,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         model: BaseMultiVectorModelAdapter,
         collection_name: str,
         initialize: bool = True,
-        vector_name: str = "late_interaction",
+        vector_name: str = "multi_vector",
         distance: models.Distance = models.Distance.COSINE,
         hnsw_config: Optional[models.HnswConfigDiff] = None,
         quantization_config: Optional[models.QuantizationConfig] = None,
@@ -39,7 +39,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
 
     def collection_config(self) -> Dict[str, Any]:
         test_embedding = self.model.embed_query("test")
-        embedding_size = test_embedding[0][0]
+        embedding_size = len(test_embedding[0])
 
         return dict(
             collection_name=self.collection_name,
