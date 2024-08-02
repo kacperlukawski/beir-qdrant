@@ -18,6 +18,7 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         model: BaseDenseModelAdapter,
         collection_name: str,
         initialize: bool = True,
+        optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         vector_name: str = "sparse",
         search_params: Optional[models.SearchParams] = None,
         distance: models.Distance = models.Distance.COSINE,
@@ -31,6 +32,7 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             model,  # noqa
             collection_name,
             initialize,
+            optimizers_config,
             vector_name,
             search_params,
         )
@@ -46,6 +48,7 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
 
         return dict(
             collection_name=self.collection_name,
+            optimizers_config=self.optimizers_config,
             vectors_config={
                 self.vector_name: models.VectorParams(
                     size=embedding_size,

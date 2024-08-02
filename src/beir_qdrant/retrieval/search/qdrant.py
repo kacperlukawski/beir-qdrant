@@ -48,10 +48,12 @@ class QdrantBase(abc.ABC):
         qdrant_client: QdrantClient,
         collection_name: str,
         initialize: bool = True,
+        optimizers_config: Optional[models.OptimizersConfigDiff] = None,
     ):
         self.qdrant_client = qdrant_client
         self.collection_name = collection_name
         self.initialize = initialize
+        self.optimizers_config = optimizers_config
 
     def search(
         self,
@@ -165,6 +167,7 @@ class QdrantBase(abc.ABC):
         return [
             f"collection_name={self.collection_name}",
             f"initialize={self.initialize}",
+            f"optimizers_config={self.optimizers_config}",
         ]
 
 
@@ -181,10 +184,11 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         model: BaseModelAdapter,
         collection_name: str,
         initialize: bool = True,
+        optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         vector_name: str = "vector",
         search_params: Optional[models.SearchParams] = None,
     ):
-        super().__init__(qdrant_client, collection_name, initialize)
+        super().__init__(qdrant_client, collection_name, initialize, optimizers_config)
         self.model = model
         self.vector_name = vector_name
         self.search_params = search_params

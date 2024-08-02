@@ -20,6 +20,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         model: BaseMultiVectorModelAdapter,
         collection_name: str,
         initialize: bool = True,
+        optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         vector_name: str = "multi_vector",
         search_params: Optional[models.SearchParams] = None,
         distance: models.Distance = models.Distance.COSINE,
@@ -33,6 +34,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             model,  # noqa
             collection_name,
             initialize,
+            optimizers_config,
             vector_name,
             search_params,
         )
@@ -49,6 +51,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
 
         return dict(
             collection_name=self.collection_name,
+            optimizers_config=self.optimizers_config,
             vectors_config={
                 self.vector_name: models.VectorParams(
                     size=embedding_size,
