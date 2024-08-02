@@ -1,3 +1,5 @@
+import logging
+
 from beir import util
 from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
@@ -15,6 +17,12 @@ from beir_qdrant.retrieval.model_adapter.sentence_transformers import (
 from beir_qdrant.retrieval.search.dense import DenseQdrantSearch
 from beir_qdrant.retrieval.search.multi_vector import MultiVectorQdrantSearch
 from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
+
+# Configure basic logging (level INFO)
+logging.basicConfig(level=logging.INFO)
+
+# Disable httpx logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 # Download and load the dataset
 dataset = "scifact"
