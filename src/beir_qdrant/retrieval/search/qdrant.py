@@ -149,6 +149,7 @@ class QdrantBase(abc.ABC):
     def _str_params(self) -> List[str]:
         return [
             f"collection_name={self.collection_name}",
+            f"initialize={self.initialize}",
         ]
 
 
@@ -201,3 +202,10 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
                 )
             )
         return points
+
+    def _str_params(self) -> List[str]:
+        return super()._str_params() + [
+            f"model={self.model}",
+            f"vector_name={self.vector_name}",
+            f"search_params={self.search_params}",
+        ]

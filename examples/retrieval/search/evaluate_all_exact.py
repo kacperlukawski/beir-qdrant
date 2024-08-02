@@ -3,6 +3,7 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient, models
 
+from beir_qdrant.retrieval.model_adapter.colbert import ColbertModelAdapter
 from beir_qdrant.retrieval.model_adapter.fastembed import (
     DenseFastEmbedModelAdapter,
     MultiVectorFastEmbedModelAdapter,
@@ -68,7 +69,29 @@ searches = [
     MultiVectorQdrantSearch(
         qdrant_client,
         model=MultiVectorFastEmbedModelAdapter(model_name="colbert-ir/colbertv2.0"),
-        collection_name=f"{dataset}-colbert",
+        collection_name=f"{dataset}-colbert-fastembed",
+        vector_name="colbert-fastembed",
+        initialize=True,
+        search_params=models.SearchParams(
+            exact=True,
+        ),
+    ),
+    MultiVectorQdrantSearch(
+        qdrant_client,
+        model=ColbertModelAdapter(
+            model_name="jinaai/jina-colbert-v1-en", doc_maxlen=8192
+        ),
+        collection_name=f"{dataset}-jina-colbert",
+        vector_name="jina-colbert",
+        initialize=True,
+        search_params=models.SearchParams(
+            exact=True,
+        ),
+    ),
+    MultiVectorQdrantSearch(
+        qdrant_client,
+        model=ColbertModelAdapter(model_name="colbert-ir/colbertv2.0"),
+        collection_name=f"{dataset}-colbert-fastembed",
         vector_name="colbert",
         initialize=True,
         search_params=models.SearchParams(
