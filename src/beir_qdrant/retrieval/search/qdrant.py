@@ -191,6 +191,7 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
 
     def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
         query_embedding = self.model.embed_query(query)
+        init_time = time.perf_counter()
         result = self.qdrant_client.query_points(
             collection_name=self.collection_name,
             query=query_embedding,
@@ -200,6 +201,11 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
             with_vectors=False,
             search_params=self.search_params,
         )
+        end_time = time.perf_counter()
+        logger.info(
+            f"Queried {self.collection_name} in {end_time - init_time:.8f} seconds"
+        )
+
         return result.points
 
     def docs_to_points(self, documents: List[Document]) -> List[models.PointStruct]:
