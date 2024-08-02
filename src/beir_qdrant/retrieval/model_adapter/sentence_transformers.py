@@ -27,11 +27,6 @@ class SentenceTransformerModelAdapter(BaseDenseModelAdapter):
         self._query_prompt = query_prompt
         self._precision = precision
 
-    def embed_document(self, document: str) -> DenseVector:
-        return self._model.encode(
-            document, prompt=self._document_prompt, precision=self._precision
-        ).tolist()
-
     def embed_documents(self, documents: List[str]) -> List[DenseVector]:
         embeddings = self._model.encode(
             documents,
@@ -66,14 +61,6 @@ class TokenEmbeddingsSentenceTransformerModelAdapter(BaseMultiVectorModelAdapter
         self._document_prompt = document_prompt
         self._query_prompt = query_prompt
         self._precision = precision
-
-    def embed_document(self, document: str) -> List[DenseVector]:
-        return self._model.encode(
-            document,
-            prompt=self._document_prompt,
-            precision=self._precision,
-            output_value="token_embeddings",
-        ).tolist()
 
     def embed_documents(self, documents: List[str]) -> List[List[DenseVector]]:
         embeddings = self._model.encode(
