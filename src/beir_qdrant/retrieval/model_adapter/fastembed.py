@@ -17,7 +17,15 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
     """
 
     def __init__(self, model_name: str):
-        self._model = TextEmbedding(model_name=model_name)
+        try:
+            import torch
+
+            use_cuda = torch.cuda.is_available()
+            providers = ["CUDAExecutionProvider"] if use_cuda else None
+        except Exception:
+            providers = None
+
+        self._model = TextEmbedding(model_name=model_name, providers=providers)
 
     def embed_documents(self, documents: List[str]) -> List[DenseVector]:
         embeddings = self._model.passage_embed(documents)
@@ -36,7 +44,15 @@ class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
     """
 
     def __init__(self, model_name: str):
-        self._model = SparseTextEmbedding(model_name=model_name)
+        try:
+            import torch
+
+            use_cuda = torch.cuda.is_available()
+            providers = ["CUDAExecutionProvider"] if use_cuda else None
+        except Exception:
+            providers = None
+
+        self._model = SparseTextEmbedding(model_name=model_name, providers=providers)
 
     def embed_documents(self, documents: List[str]) -> List[models.SparseVector]:
         embeddings = self._model.passage_embed(documents)
@@ -58,7 +74,17 @@ class MultiVectorFastEmbedModelAdapter(BaseMultiVectorModelAdapter):
     """
 
     def __init__(self, model_name: str):
-        self._model = LateInteractionTextEmbedding(model_name=model_name)
+        try:
+            import torch
+
+            use_cuda = torch.cuda.is_available()
+            providers = ["CUDAExecutionProvider"] if use_cuda else None
+        except Exception:
+            providers = None
+
+        self._model = LateInteractionTextEmbedding(
+            model_name=model_name, providers=providers
+        )
 
     def embed_documents(self, documents: List[str]) -> List[List[DenseVector]]:
         embeddings = self._model.passage_embed(documents)

@@ -711,6 +711,33 @@ tokenizers = ">=0.15,<1.0"
 tqdm = ">=4.66,<5.0"
 
 [[package]]
+name = "fastembed-gpu"
+version = "0.3.4"
+description = "Fast, light, accurate library built for retrieval embedding generation"
+optional = false
+python-versions = "<3.13,>=3.8.0"
+files = [
+    {file = "fastembed_gpu-0.3.4-py3-none-any.whl", hash = "sha256:4be63239ae86af7b8cd11cde8753663216b119be830a3919da54a6b3d4fab245"},
+    {file = "fastembed_gpu-0.3.4.tar.gz", hash = "sha256:4ef0c5870346bd4d9b75eb3af14ef7146056c2585b3b5d6353f49c28aca4ac81"},
+]
+
+[package.dependencies]
+huggingface-hub = ">=0.20,<1.0"
+loguru = ">=0.7.2,<0.8.0"
+mmh3 = ">=4.0,<5.0"
+numpy = [
+    {version = ">=1.21,<2", markers = "python_version < \"3.12\""},
+    {version = ">=1.26,<2", markers = "python_version >= \"3.12\""},
+]
+onnxruntime-gpu = ">=1.17.0,<2.0.0"
+pillow = ">=10.3.0,<11.0.0"
+PyStemmer = ">=2.2.0,<3.0.0"
+requests = ">=2.31,<3.0"
+snowballstemmer = ">=2.2.0,<3.0.0"
+tokenizers = ">=0.15,<1.0"
+tqdm = ">=4.66,<5.0"
+
+[[package]]
 name = "filelock"
 version = "3.15.4"
 description = "A platform independent file lock."
@@ -1924,6 +1951,33 @@ files = [
     {file = "onnxruntime-1.18.1-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ad3187c1faff3ac15f7f0e7373ef4788c582cafa655a80fdbb33eaec88976c66"},
     {file = "onnxruntime-1.18.1-cp39-cp39-win32.whl", hash = "sha256:34657c78aa4e0b5145f9188b550ded3af626651b15017bf43d280d7e23dbf195"},
     {file = "onnxruntime-1.18.1-cp39-cp39-win_amd64.whl", hash = "sha256:9c14fd97c3ddfa97da5feef595e2c73f14c2d0ec1d4ecbea99c8d96603c89589"},
+]
+
+[package.dependencies]
+coloredlogs = "*"
+flatbuffers = "*"
+numpy = ">=1.21.6,<2.0"
+packaging = "*"
+protobuf = "*"
+sympy = "*"
+
+[[package]]
+name = "onnxruntime-gpu"
+version = "1.18.1"
+description = "ONNX Runtime is a runtime accelerator for Machine Learning models"
+optional = false
+python-versions = "*"
+files = [
+    {file = "onnxruntime_gpu-1.18.1-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e9de7b8c7c975f7830d1e9323daca2090408df821f2adc10ea267b4f469b59e0"},
+    {file = "onnxruntime_gpu-1.18.1-cp310-cp310-win_amd64.whl", hash = "sha256:7622a5979bb64a6631f888439b6ac8b11fbdd47da980425c697b82d4dd04b427"},
+    {file = "onnxruntime_gpu-1.18.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:af2d3ee6fba72b57abf6f379b8aca30ee773959d4346271e7d92557dd5cf2901"},
+    {file = "onnxruntime_gpu-1.18.1-cp311-cp311-win_amd64.whl", hash = "sha256:e40ba43771043fe286fea38b2c6549d1cc4b2b5b424624163c923163a8dc27ac"},
+    {file = "onnxruntime_gpu-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:87d1884523f485f40d3a126677a9f93fc15569dd817fc753ee7fc519142a4425"},
+    {file = "onnxruntime_gpu-1.18.1-cp312-cp312-win_amd64.whl", hash = "sha256:3f2ab38a62350965f5007111728410b3ef25213104dd1e7d61ecc158002ea3f5"},
+    {file = "onnxruntime_gpu-1.18.1-cp38-cp38-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:96e665393934cd6a2d7f5c4a8449815fc88e6afaeafc0b1da795545fabc7624f"},
+    {file = "onnxruntime_gpu-1.18.1-cp38-cp38-win_amd64.whl", hash = "sha256:5ba076faa5c6fdccf99a607ea0910f066ad4f53c472269ac9f5768c5193aa6c7"},
+    {file = "onnxruntime_gpu-1.18.1-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d39d3ff85eaa70d85401bd81f675b44959a135fdfb2a21383f424d1f8f290c32"},
+    {file = "onnxruntime_gpu-1.18.1-cp39-cp39-win_amd64.whl", hash = "sha256:126035cd623445f9922ca0f277cf18ffc83d7e073c0c5c8057eee37f22e24440"},
 ]
 
 [package.dependencies]
@@ -3716,4 +3770,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.13,>=3.9.0"
-content-hash = "230ca9a21e4b7d404bb8607d731fc2dae517d011d4ebe7773c3ad3253e62ddc2"
+content-hash = "1429b6707d30d174c375bde47101afd641bc1b8eb2cc71fc2dc16edb4082dc5e"
