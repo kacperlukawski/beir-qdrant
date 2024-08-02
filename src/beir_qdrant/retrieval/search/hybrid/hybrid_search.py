@@ -25,10 +25,11 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
         qdrant_client: QdrantClient,
         collection_name: str,
         initialize: bool = True,
+        optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         searches: Optional[Iterable[SingleNamedVectorQdrantBase]] = None,
         search_params: Optional[models.SearchParams] = None,
     ):
-        super().__init__(qdrant_client, collection_name, initialize)
+        super().__init__(qdrant_client, collection_name, initialize, optimizers_config)
         self.searches = searches or []
         self.search_params = search_params
 
@@ -41,6 +42,7 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
         # Merge the configurations. Since we only use named vectors, we can safely merge them.
         merged_config = {
             "collection_name": self.collection_name,
+            "optimizers_config": self.optimizers_config,
             "vectors_config": {},
             "sparse_vectors_config": {},
         }

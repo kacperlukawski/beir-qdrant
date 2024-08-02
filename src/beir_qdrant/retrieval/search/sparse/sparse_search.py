@@ -23,6 +23,7 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         model: BaseSparseModelAdapter,
         collection_name: str,
         initialize: bool = True,
+        optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         vector_name: str = "sparse",
         search_params: Optional[models.SearchParams] = None,
         index: Optional[models.SparseVectorParams] = None,
@@ -33,6 +34,7 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             model,  # noqa
             collection_name,
             initialize,
+            optimizers_config,
             vector_name,
             search_params,
         )
@@ -42,6 +44,7 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     def collection_config(self) -> Dict[str, Any]:
         return dict(
             collection_name=self.collection_name,
+            optimizers_config=self.optimizers_config,
             vectors_config={},
             sparse_vectors_config={
                 self.vector_name: models.SparseVectorParams(
