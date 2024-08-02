@@ -1,8 +1,12 @@
+import logging
+import time
 from typing import List
 
 from qdrant_client import models
 
 from beir_qdrant.retrieval.search.hybrid import HybridQdrantSearch
+
+logger = logging.getLogger(__name__)
 
 
 class RRFHybridQdrantSearch(HybridQdrantSearch):
@@ -20,6 +24,7 @@ class RRFHybridQdrantSearch(HybridQdrantSearch):
             )
             for search in self.searches
         ]
+        init_time = time.perf_counter()
         results = self.qdrant_client.query_points(
             self.collection_name,
             prefetch=prefetch,
@@ -31,4 +36,9 @@ class RRFHybridQdrantSearch(HybridQdrantSearch):
             with_vectors=False,
             search_params=self.search_params,
         )
+        end_time = time.perf_counter()
+        logger.info(
+            f"Queried {self.collection_name} in {end_time - init_time:.8f} seconds"
+        )
+
         return results.points
