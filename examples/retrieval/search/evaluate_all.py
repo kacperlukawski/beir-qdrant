@@ -3,6 +3,7 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient, models
 
+from beir_qdrant.retrieval.model_adapter.colbert import ColbertModelAdapter
 from beir_qdrant.retrieval.model_adapter.fastembed import (
     DenseFastEmbedModelAdapter,
     MultiVectorFastEmbedModelAdapter,
@@ -30,7 +31,7 @@ corpus, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="te
 qdrant_client = QdrantClient("http://localhost:6333")
 
 # Create all the searches to compare
-searches = [
+base_searches = [
     DenseQdrantSearch(
         qdrant_client,
         model=DenseFastEmbedModelAdapter(
@@ -60,7 +61,23 @@ searches = [
     MultiVectorQdrantSearch(
         qdrant_client,
         model=MultiVectorFastEmbedModelAdapter(model_name="colbert-ir/colbertv2.0"),
-        collection_name=f"{dataset}-colbert",
+        collection_name=f"{dataset}-colbert-fastembed",
+        vector_name="colbert-fastembed",
+        initialize=True,
+    ),
+    MultiVectorQdrantSearch(
+        qdrant_client,
+        model=ColbertModelAdapter(
+            model_name="jinaai/jina-colbert-v1-en", doc_maxlen=8192
+        ),
+        collection_name=f"{dataset}-jina-colbert",
+        vector_name="jina-colbert",
+        initialize=True,
+    ),
+    MultiVectorQdrantSearch(
+        qdrant_client,
+        model=ColbertModelAdapter(model_name="colbert-ir/colbertv2.0"),
+        collection_name=f"{dataset}-colbert-fastembed",
         vector_name="colbert",
         initialize=True,
     ),
@@ -92,16 +109,14 @@ rrf_search = RRFHybridQdrantSearch(
     qdrant_client,
     collection_name=f"{dataset}-rrf",
     initialize=True,
-    searches=searches,
+    searches=base_searches,
 )
-searches.append(rrf_search)
+searches = base_searches + [rrf_search]
 
 # Evaluate all the searches on the same test set
 for model in searches:
     retriever = EvaluateRetrieval(model)
-    results = retriever.retrieve(
-        dict(c for i, c in enumerate(corpus.items()) if i < 100), queries
-    )
+    results = retriever.retrieve(corpus, queries)
 
     ndcg, _map, recall, precision = retriever.evaluate(
         qrels, results, retriever.k_values

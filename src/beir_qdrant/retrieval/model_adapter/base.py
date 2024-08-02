@@ -17,21 +17,13 @@ class BaseModelAdapter(abc.ABC):
     """
 
     @abc.abstractmethod
-    def embed_document(self, document: str) -> AnyVector:
-        """
-        Embed a single document.
-        :param document:
-        :return:
-        """
-        raise NotImplementedError
-
     def embed_documents(self, documents: List[str]) -> List[AnyVector]:
         """
         Embed multiple documents.
         :param documents:
         :return:
         """
-        return [self.embed_document(doc) for doc in documents]
+        raise NotImplementedError
 
     @abc.abstractmethod
     def embed_query(self, query: str) -> AnyVector:
@@ -44,7 +36,7 @@ class BaseDenseModelAdapter(abc.ABC):
     """
 
     @abc.abstractmethod
-    def embed_document(self, document: str) -> DenseVector:
+    def embed_documents(self, documents: List[str]) -> List[DenseVector]:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -60,7 +52,7 @@ class BaseSparseModelAdapter(abc.ABC):
     """
 
     @abc.abstractmethod
-    def embed_document(self, document: str) -> models.SparseVector:
+    def embed_documents(self, documents: List[str]) -> List[models.SparseVector]:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -75,7 +67,7 @@ class BaseMultiVectorModelAdapter(abc.ABC):
     """
 
     @abc.abstractmethod
-    def embed_document(self, document: str) -> List[DenseVector]:
+    def embed_documents(self, documents: List[str]) -> List[List[DenseVector]]:
         raise NotImplementedError
 
     @abc.abstractmethod
