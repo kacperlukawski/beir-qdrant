@@ -5,7 +5,8 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient
 
-from beir_qdrant.retrieval.search.sparse import BM42Search
+from beir_qdrant.retrieval.model_adapter.fastembed import SparseFastEmbedModelAdapter
+from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
 
 # Set up logging
 logging.basicConfig(
@@ -29,7 +30,14 @@ corpus, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="te
 qdrant_client = QdrantClient("http://localhost:6333")
 
 # Create the retriever and evaluate it on the test set
-model = BM42Search(qdrant_client, collection_name="scifact-bm42", initialize=True)
+model = SparseQdrantSearch(
+    qdrant_client,
+    model=SparseFastEmbedModelAdapter(
+        model_name="Qdrant/bm42-all-minilm-l6-v2-attentions"
+    ),
+    collection_name="scifact-bm42",
+    initialize=True,
+)
 retriever = EvaluateRetrieval(model)
 results = retriever.retrieve(corpus, queries)
 

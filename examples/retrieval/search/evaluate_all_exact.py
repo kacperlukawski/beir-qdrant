@@ -12,7 +12,6 @@ from beir_qdrant.retrieval.model_adapter.sentence_transformers import (
     TokenEmbeddingsSentenceTransformerModelAdapter,
 )
 from beir_qdrant.retrieval.search.dense import DenseQdrantSearch
-from beir_qdrant.retrieval.search.hybrid import RRFHybridQdrantSearch
 from beir_qdrant.retrieval.search.multi_vector import MultiVectorQdrantSearch
 from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
 
@@ -42,6 +41,9 @@ searches = [
         quantization_config=models.BinaryQuantization(
             binary=models.BinaryQuantizationConfig(always_ram=True)
         ),
+        search_params=models.SearchParams(
+            exact=True,
+        ),
     ),
     SparseQdrantSearch(
         qdrant_client,
@@ -49,6 +51,9 @@ searches = [
         collection_name=f"{dataset}-splade",
         vector_name="splade",
         initialize=True,
+        search_params=models.SearchParams(
+            exact=True,
+        ),
     ),
     SparseQdrantSearch(
         qdrant_client,
@@ -56,6 +61,9 @@ searches = [
         collection_name=f"{dataset}-bm42",
         vector_name="bm42",
         initialize=True,
+        search_params=models.SearchParams(
+            exact=True,
+        ),
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -63,6 +71,9 @@ searches = [
         collection_name=f"{dataset}-colbert",
         vector_name="colbert",
         initialize=True,
+        search_params=models.SearchParams(
+            exact=True,
+        ),
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -72,6 +83,9 @@ searches = [
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings",
         vector_name="all-MiniLM-L6-v2-token-embeddings",
         initialize=True,
+        search_params=models.SearchParams(
+            exact=True,
+        ),
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -84,24 +98,16 @@ searches = [
         quantization_config=models.ScalarQuantization(
             scalar=models.ScalarQuantizationConfig(type=models.ScalarType.INT8)
         ),
+        search_params=models.SearchParams(
+            exact=True,
+        ),
     ),
 ]
-
-# Combine all the searches using Rank Fusion
-rrf_search = RRFHybridQdrantSearch(
-    qdrant_client,
-    collection_name=f"{dataset}-rrf",
-    initialize=True,
-    searches=searches,
-)
-searches.append(rrf_search)
 
 # Evaluate all the searches on the same test set
 for model in searches:
     retriever = EvaluateRetrieval(model)
-    results = retriever.retrieve(
-        dict(c for i, c in enumerate(corpus.items()) if i < 100), queries
-    )
+    results = retriever.retrieve(corpus, queries)
 
     ndcg, _map, recall, precision = retriever.evaluate(
         qrels, results, retriever.k_values

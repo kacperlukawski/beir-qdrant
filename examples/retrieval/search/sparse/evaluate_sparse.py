@@ -5,6 +5,7 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient
 
+from beir_qdrant.retrieval.model_adapter.fastembed import SparseFastEmbedModelAdapter
 from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
 
 # Set up logging
@@ -30,7 +31,10 @@ qdrant_client = QdrantClient("http://localhost:6333")
 
 # Create the retriever and evaluate it on the test set
 model = SparseQdrantSearch(
-    qdrant_client, collection_name="scifact-splade", initialize=True
+    qdrant_client,
+    model=SparseFastEmbedModelAdapter(model_name="prithvida/Splade_PP_en_v1"),
+    collection_name="scifact-splade",
+    initialize=True,
 )
 retriever = EvaluateRetrieval(model)
 results = retriever.retrieve(corpus, queries)
