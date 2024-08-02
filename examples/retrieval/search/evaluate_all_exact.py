@@ -47,6 +47,9 @@ searches = [
         collection_name=f"{dataset}-all-MiniLM-L6-v2",
         vector_name="all-MiniLM-L6-v2",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         quantization_config=models.BinaryQuantization(
             binary=models.BinaryQuantizationConfig(always_ram=True)
         ),
@@ -60,6 +63,9 @@ searches = [
         collection_name=f"{dataset}-splade",
         vector_name="splade",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         search_params=models.SearchParams(
             exact=True,
         ),
@@ -70,6 +76,9 @@ searches = [
         collection_name=f"{dataset}-bm42",
         vector_name="bm42",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         search_params=models.SearchParams(
             exact=True,
         ),
@@ -80,6 +89,9 @@ searches = [
         collection_name=f"{dataset}-colbert-fastembed",
         vector_name="colbert-fastembed",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         search_params=models.SearchParams(
             exact=True,
         ),
@@ -92,6 +104,9 @@ searches = [
         collection_name=f"{dataset}-jina-colbert",
         vector_name="jina-colbert",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         search_params=models.SearchParams(
             exact=True,
         ),
@@ -102,6 +117,9 @@ searches = [
         collection_name=f"{dataset}-colbert-fastembed",
         vector_name="colbert",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         search_params=models.SearchParams(
             exact=True,
         ),
@@ -114,6 +132,9 @@ searches = [
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings",
         vector_name="all-MiniLM-L6-v2-token-embeddings",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         search_params=models.SearchParams(
             exact=True,
         ),
@@ -126,6 +147,9 @@ searches = [
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings-sq",
         vector_name="all-MiniLM-L6-v2-token-embeddings-sq",
         initialize=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
         quantization_config=models.ScalarQuantization(
             scalar=models.ScalarQuantizationConfig(type=models.ScalarType.INT8)
         ),
