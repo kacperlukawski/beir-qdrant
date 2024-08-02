@@ -16,6 +16,7 @@ class RRFHybridQdrantSearch(HybridQdrantSearch):
                 query=search.model.embed_query(query),
                 using=search.vector_name,
                 limit=limit,
+                params=self.search_params,
             )
             for search in self.searches
         ]
