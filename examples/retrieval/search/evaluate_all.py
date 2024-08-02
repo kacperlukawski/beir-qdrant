@@ -38,6 +38,7 @@ searches = [
         ),
         collection_name=f"{dataset}-all-MiniLM-L6-v2",
         vector_name="all-MiniLM-L6-v2",
+        initialize=True,
         quantization_config=models.BinaryQuantization(
             binary=models.BinaryQuantizationConfig(always_ram=True)
         ),
@@ -70,7 +71,7 @@ searches = [
         ),
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings",
         vector_name="all-MiniLM-L6-v2-token-embeddings",
-        initialize=False,
+        initialize=True,
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -98,7 +99,9 @@ searches.append(searches)
 # Evaluate all the searches on the same test set
 for model in searches:
     retriever = EvaluateRetrieval(model)
-    results = retriever.retrieve(corpus, queries)
+    results = retriever.retrieve(
+        dict(c for i, c in enumerate(corpus.items()) if i < 100), queries
+    )
 
     ndcg, _map, recall, precision = retriever.evaluate(
         qrels, results, retriever.k_values

@@ -57,5 +57,5 @@ Qdrant supports different search modes, including:
 
 - Dense search: `beir_qdrant.retrieval.search.dense.DenseQdrantSearch`
 - Sparse search: `beir_qdrant.retrieval.search.sparse.SparseQdrantSearch`
-- Late interaction: `beir_qdrant.retrieval.search.late_interaction.LateInteractionQdrantSearch`
+- Multi vector search: `beir_qdrant.retrieval.search.multi_vector import MultiVectorQdrantSearch`
 - Hybrid search with RRF: `beir_qdrant.retrieval.search.hybrid.RRFHybridQdrantSearch`
