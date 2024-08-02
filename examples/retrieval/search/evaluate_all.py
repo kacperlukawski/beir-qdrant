@@ -92,9 +92,9 @@ rrf_search = RRFHybridQdrantSearch(
     qdrant_client,
     collection_name=f"{dataset}-rrf",
     initialize=True,
-    searches=searches[0:2],
+    searches=searches,
 )
-searches.append(searches)
+searches.append(rrf_search)
 
 # Evaluate all the searches on the same test set
 for model in searches:
