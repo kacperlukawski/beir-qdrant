@@ -37,6 +37,7 @@ searches = [
         ),
         collection_name=f"{dataset}-all-MiniLM-L6-v2",
         vector_name="all-MiniLM-L6-v2",
+        initialize=True,
         quantization_config=models.BinaryQuantization(
             binary=models.BinaryQuantizationConfig(always_ram=True)
         ),
@@ -81,7 +82,7 @@ searches = [
         ),
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings",
         vector_name="all-MiniLM-L6-v2-token-embeddings",
-        initialize=False,
+        initialize=True,
         search_params=models.SearchParams(
             exact=True,
         ),
