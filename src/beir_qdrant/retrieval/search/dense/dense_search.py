@@ -28,12 +28,12 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     ):
         super().__init__(
             qdrant_client,
-            model,
+            model,  # noqa
             collection_name,
             initialize,
             vector_name,
             search_params,
-        )  # noqa
+        )
         self.distance = distance
         self.hnsw_config = hnsw_config
         self.quantization_config = quantization_config
