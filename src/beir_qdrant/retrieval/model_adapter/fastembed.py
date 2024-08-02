@@ -19,9 +19,6 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
     def __init__(self, model_name: str):
         self._model = TextEmbedding(model_name=model_name)
 
-    def embed_document(self, document: str) -> DenseVector:
-        return next(self._model.passage_embed([document])).tolist()  # noqa
-
     def embed_documents(self, documents: List[str]) -> List[DenseVector]:
         embeddings = self._model.passage_embed(documents)
         return [embedding.tolist() for embedding in embeddings]
@@ -40,10 +37,6 @@ class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
 
     def __init__(self, model_name: str):
         self._model = SparseTextEmbedding(model_name=model_name)
-
-    def embed_document(self, document: str) -> models.SparseVector:
-        embedding = next(self._model.passage_embed([document])).as_object()  # noqa
-        return models.SparseVector(**embedding)
 
     def embed_documents(self, documents: List[str]) -> List[models.SparseVector]:
         embeddings = self._model.passage_embed(documents)
@@ -66,9 +59,6 @@ class MultiVectorFastEmbedModelAdapter(BaseMultiVectorModelAdapter):
 
     def __init__(self, model_name: str):
         self._model = LateInteractionTextEmbedding(model_name=model_name)
-
-    def embed_document(self, document: str) -> List[DenseVector]:
-        return next(self._model.passage_embed([document])).tolist()  # noqa
 
     def embed_documents(self, documents: List[str]) -> List[List[DenseVector]]:
         embeddings = self._model.passage_embed(documents)
