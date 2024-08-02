@@ -1,12 +1,38 @@
 import abc
 import logging
 import time
-from typing import Any, Dict, List
+import uuid
+from dataclasses import dataclass
+from itertools import islice
+from typing import Any, Dict, List, Optional
 
 from qdrant_client import QdrantClient, models
 from tqdm import tqdm
 
+from beir_qdrant.retrieval.model_adapter.base import BaseModelAdapter
+
 logger = logging.getLogger(__name__)
+
+
+def batched(iterable, n=1):
+    """
+    Batch an iterable into chunks of size n.
+    :param iterable:
+    :param n:
+    :return:
+    """
+    it = iter(iterable)
+    while True:
+        batch = list(islice(it, n))
+        if not batch:
+            return
+        yield batch
+
+
+@dataclass(frozen=True, slots=True)
+class Document:
+    id: str
+    payload: Dict[str, str]
 
 
 class QdrantBase(abc.ABC):
@@ -56,22 +82,16 @@ class QdrantBase(abc.ABC):
         :param corpus:
         :return:
         """
-        points = []
-        for doc_id, doc in tqdm(corpus.items(), desc="Corpus indexing"):
-            points.append(self.doc_to_point(doc_id, doc))
-            if len(points) >= self.BATCH_SIZE:
-                self.qdrant_client.upload_points(
-                    collection_name=self.collection_name,
-                    points=points,
-                    batch_size=self.BATCH_SIZE,
-                )
-                points = []
-
-        if len(points) > 0:
+        # Iterate corpus in batches, not one by one
+        corpus_items = corpus.items()
+        for batch in batched(
+            tqdm(corpus_items, desc="Corpus indexing"), self.BATCH_SIZE
+        ):
+            documents = [Document(doc_id, doc) for doc_id, doc in batch]
+            points = self.docs_to_points(documents)
             self.qdrant_client.upload_points(
                 collection_name=self.collection_name,
                 points=points,
-                batch_size=self.BATCH_SIZE,
             )
 
     def recreate_collection(self):
@@ -92,11 +112,10 @@ class QdrantBase(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def doc_to_point(self, doc_id: str, doc: Dict[str, str]) -> models.PointStruct:
+    def docs_to_points(self, documents: List[Document]) -> List[models.PointStruct]:
         """
-        Convert a document to a Qdrant point.
-        :param doc_id:
-        :param doc:
+        Convert a list of documents to Qdrant points.
+        :param documents:
         :return:
         """
         raise NotImplementedError
@@ -133,25 +152,52 @@ class QdrantBase(abc.ABC):
         ]
 
 
-class SingleVectorQdrantBase(QdrantBase):
+class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
     """
-    Base class for Qdrant based search with a single vector.
+    Base class for Qdrant based search with a single vector. Single vector means here, a single named vector of a point.
+    Even if it contains multiple token-level embeddings, we still think of it as a single vector. Contrast this with
+    hybrid search, where we have multiple named vectors used downstream.
     """
 
     def __init__(
         self,
         qdrant_client: QdrantClient,
+        model: BaseModelAdapter,
         collection_name: str,
         initialize: bool = True,
         vector_name: str = "vector",
+        search_params: Optional[models.SearchParams] = None,
     ):
         super().__init__(qdrant_client, collection_name, initialize)
+        self.model = model
         self.vector_name = vector_name
+        self.search_params = search_params
 
-    @abc.abstractmethod
-    def create_document_vector(self, document: str) -> models.Vector:
-        raise NotImplementedError
+    def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
+        query_embedding = self.model.embed_query(query)
+        result = self.qdrant_client.query_points(
+            collection_name=self.collection_name,
+            query=query_embedding,
+            using=self.vector_name,
+            limit=limit,
+            with_payload=True,
+            with_vectors=False,
+            search_params=self.search_params,
+        )
+        return result.points
 
-    @abc.abstractmethod
-    def create_query_vector(self, query: str) -> models.Vector:
-        raise NotImplementedError
+    def docs_to_points(self, documents: List[Document]) -> List[models.PointStruct]:
+        # Create embeddings for all the documents in a single model call
+        texts = [doc.payload["text"] for doc in documents]
+        embeddings = self.model.embed_documents(texts)
+
+        points = []
+        for doc, embedding in zip(documents, embeddings):
+            points.append(
+                models.PointStruct(
+                    id=uuid.uuid4().hex,
+                    vector={self.vector_name: embedding},
+                    payload={"doc_id": doc.id, **doc.payload},
+                )
+            )
+        return points

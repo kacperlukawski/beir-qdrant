@@ -5,6 +5,7 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient
 
+from beir_qdrant.retrieval.model_adapter.fastembed import DenseFastEmbedModelAdapter
 from beir_qdrant.retrieval.search.dense import DenseQdrantSearch
 
 # Set up logging
@@ -31,6 +32,9 @@ qdrant_client = QdrantClient("http://localhost:6333")
 # Create the retriever and evaluate it on the test set
 model = DenseQdrantSearch(
     qdrant_client,
+    model=DenseFastEmbedModelAdapter(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    ),
     collection_name="scifact-all-MiniLM-L6-v2",
     initialize=True,
 )

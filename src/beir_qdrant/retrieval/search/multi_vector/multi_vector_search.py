@@ -1,16 +1,15 @@
-import uuid
 from typing import Any, Dict, List, Optional
 
 from beir.retrieval.search import BaseSearch
-from fastembed import LateInteractionTextEmbedding
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.search.qdrant import SingleVectorQdrantBase
+from beir_qdrant.retrieval.model_adapter.base import BaseMultiVectorModelAdapter
+from beir_qdrant.retrieval.search.qdrant import SingleNamedVectorQdrantBase
 
 
-class LateInteractionQdrantSearch(SingleVectorQdrantBase, BaseSearch):
+class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     """
-    Late interaction search using Qdrant, for searches like COLBERT.
+    Multi-vector search, for example for late interaction models like ColBERT.
     """
 
     BATCH_SIZE = 4
@@ -18,20 +17,24 @@ class LateInteractionQdrantSearch(SingleVectorQdrantBase, BaseSearch):
     def __init__(
         self,
         qdrant_client: QdrantClient,
+        model: BaseMultiVectorModelAdapter,
         collection_name: str,
         initialize: bool = True,
-        vector_name: str = "late_interaction",
-        late_interaction_model_name: str = "colbert-ir/colbertv2.0",
+        vector_name: str = "multi_vector",
+        search_params: Optional[models.SearchParams] = None,
         distance: models.Distance = models.Distance.COSINE,
         hnsw_config: Optional[models.HnswConfigDiff] = None,
         quantization_config: Optional[models.QuantizationConfig] = None,
         on_disk: Optional[bool] = None,
         datatype: Optional[models.Datatype] = None,
     ):
-        super().__init__(qdrant_client, collection_name, initialize)
-        self.vector_name = vector_name
-        self.model = LateInteractionTextEmbedding(
-            model_name=late_interaction_model_name
+        super().__init__(
+            qdrant_client,
+            model,  # noqa
+            collection_name,
+            initialize,
+            vector_name,
+            search_params,
         )
         self.distance = distance
         self.hnsw_config = hnsw_config
@@ -40,8 +43,9 @@ class LateInteractionQdrantSearch(SingleVectorQdrantBase, BaseSearch):
         self.datatype = datatype
 
     def collection_config(self) -> Dict[str, Any]:
-        test_embedding = next(self.model.query_embed("test"))
-        embedding_size = test_embedding.shape[1]
+        assert isinstance(self.model, BaseMultiVectorModelAdapter)
+        test_embedding = self.model.embed_query("test")
+        embedding_size = len(test_embedding[0])
 
         return dict(
             collection_name=self.collection_name,
@@ -60,36 +64,10 @@ class LateInteractionQdrantSearch(SingleVectorQdrantBase, BaseSearch):
             },
         )
 
-    def doc_to_point(self, doc_id: str, doc: Dict[str, str]) -> models.PointStruct:
-        doc_embedding = self.create_document_vector(doc["text"])
-        return models.PointStruct(
-            id=uuid.uuid4().hex,
-            vector={self.vector_name: doc_embedding},
-            payload={"doc_id": doc_id, **doc},
-        )
-
-    def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
-        query_embedding = self.create_query_vector(query)
-        query_response = self.qdrant_client.query_points(
-            self.collection_name,
-            query=query_embedding,
-            using=self.vector_name,
-            limit=limit,
-            with_payload=True,
-            with_vectors=False,
-        )
-        return query_response.points
-
-    def create_document_vector(self, document: str) -> models.Vector:
-        return next(self.model.passage_embed([document])).tolist()  # noqa
-
-    def create_query_vector(self, query: str) -> models.Vector:
-        return next(self.model.query_embed(query)).tolist()  # noqa
-
     def _str_params(self) -> List[str]:
         return super()._str_params() + [
+            f"model={self.model}",
             f"vector_name={self.vector_name}",
-            f"late_interaction_model_name={self.model.model_name}",
             f"distance={self.distance}",
             f"hnsw_config={self.hnsw_config}",
             f"quantization_config={self.quantization_config}",
