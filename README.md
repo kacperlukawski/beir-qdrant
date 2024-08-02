@@ -57,6 +57,5 @@ Qdrant supports different search modes, including:
 
 - Dense search: `beir_qdrant.retrieval.search.dense.DenseQdrantSearch`
 - Sparse search: `beir_qdrant.retrieval.search.sparse.SparseQdrantSearch`
-- BM42 search: `beir_qdrant.retrieval.search.sparse.BM42Search`
 - Late interaction: `beir_qdrant.retrieval.search.late_interaction.LateInteractionQdrantSearch`
 - Hybrid search with RRF: `beir_qdrant.retrieval.search.hybrid.RRFHybridQdrantSearch`

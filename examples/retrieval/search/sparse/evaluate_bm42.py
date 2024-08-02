@@ -36,9 +36,8 @@ model = SparseQdrantSearch(
         model_name="Qdrant/bm42-all-minilm-l6-v2-attentions"
     ),
     collection_name="scifact-bm42",
-    initialize=False,
+    initialize=True,
 )
-
 retriever = EvaluateRetrieval(model)
 results = retriever.retrieve(corpus, queries)
 

@@ -1,9 +1,10 @@
 import abc
-from typing import Any, List
+from typing import List, Union
 
 from qdrant_client import models
 
 DenseVector = List[float]
+AnyVector = Union[DenseVector, models.SparseVector, List[DenseVector]]
 
 
 class BaseModelAdapter(abc.ABC):
@@ -16,11 +17,24 @@ class BaseModelAdapter(abc.ABC):
     """
 
     @abc.abstractmethod
-    def embed_document(self, document: str) -> Any:
+    def embed_document(self, document: str) -> AnyVector:
+        """
+        Embed a single document.
+        :param document:
+        :return:
+        """
         raise NotImplementedError
 
+    def embed_documents(self, documents: List[str]) -> List[AnyVector]:
+        """
+        Embed multiple documents.
+        :param documents:
+        :return:
+        """
+        return [self.embed_document(doc) for doc in documents]
+
     @abc.abstractmethod
-    def embed_query(self, query: str) -> Any:
+    def embed_query(self, query: str) -> AnyVector:
         raise NotImplementedError
 
 

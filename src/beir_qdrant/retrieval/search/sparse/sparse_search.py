@@ -1,5 +1,4 @@
 import logging
-import uuid
 from typing import Any, Dict, List, Optional
 
 from beir.retrieval.search import BaseSearch
@@ -23,12 +22,18 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         collection_name: str,
         initialize: bool = True,
         vector_name: str = "sparse",
+        search_params: Optional[models.SearchParams] = None,
         index: Optional[models.SparseVectorParams] = None,
         modifier: Optional[models.Modifier] = None,
     ):
-        super().__init__(qdrant_client, model, collection_name, initialize)  # noqa
-        self.model = model
-        self.vector_name = vector_name
+        super().__init__(
+            qdrant_client,
+            model,
+            collection_name,
+            initialize,
+            vector_name,
+            search_params,
+        )  # noqa
         self.index = index
         self.modifier = modifier
 
@@ -42,14 +47,6 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
                     modifier=self.modifier,
                 )
             },
-        )
-
-    def doc_to_point(self, doc_id: str, doc: Dict[str, str]) -> models.PointStruct:
-        doc_embedding = self.model.embed_document(doc["text"])
-        return models.PointStruct(
-            id=uuid.uuid4().hex,
-            vector={self.vector_name: doc_embedding},
-            payload={"doc_id": doc_id, **doc},
         )
 
     def _str_params(self) -> List[str]:

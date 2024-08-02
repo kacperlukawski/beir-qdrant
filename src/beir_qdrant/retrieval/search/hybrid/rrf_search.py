@@ -17,7 +17,7 @@ class RRFHybridQdrantSearch(HybridQdrantSearch):
                 using=search.vector_name,
                 limit=limit,
             )
-            for search in self.inner_searches
+            for search in self.searches
         ]
         results = self.qdrant_client.query_points(
             self.collection_name,
@@ -28,5 +28,6 @@ class RRFHybridQdrantSearch(HybridQdrantSearch):
             limit=limit,
             with_payload=True,
             with_vectors=False,
+            search_params=self.search_params,
         )
         return results.points

@@ -22,8 +22,15 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
     def embed_document(self, document: str) -> DenseVector:
         return next(self._model.passage_embed([document])).tolist()  # noqa
 
+    def embed_documents(self, documents: List[str]) -> List[DenseVector]:
+        embeddings = self._model.passage_embed(documents)
+        return [embedding.tolist() for embedding in embeddings]
+
     def embed_query(self, query: str) -> DenseVector:
         return next(self._model.query_embed(query)).tolist()  # noqa
+
+    def __str__(self):
+        return f"DenseFastEmbedModelAdapter(model_name={self._model.model_name})"
 
 
 class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
@@ -38,9 +45,18 @@ class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
         embedding = next(self._model.passage_embed([document])).as_object()  # noqa
         return models.SparseVector(**embedding)
 
+    def embed_documents(self, documents: List[str]) -> List[models.SparseVector]:
+        embeddings = self._model.passage_embed(documents)
+        return [
+            models.SparseVector(**embedding.as_object()) for embedding in embeddings
+        ]
+
     def embed_query(self, query: str) -> models.SparseVector:
         embedding = next(self._model.query_embed(query)).as_object()  # noqa
         return models.SparseVector(**embedding)
+
+    def __str__(self):
+        return f"SparseFastEmbedModelAdapter(model_name={self._model.model_name})"
 
 
 class MultiVectorFastEmbedModelAdapter(BaseMultiVectorModelAdapter):
@@ -54,5 +70,12 @@ class MultiVectorFastEmbedModelAdapter(BaseMultiVectorModelAdapter):
     def embed_document(self, document: str) -> List[DenseVector]:
         return next(self._model.passage_embed([document])).tolist()  # noqa
 
+    def embed_documents(self, documents: List[str]) -> List[List[DenseVector]]:
+        embeddings = self._model.passage_embed(documents)
+        return [embedding.tolist() for embedding in embeddings]
+
     def embed_query(self, query: str) -> List[DenseVector]:
         return next(self._model.query_embed(query)).tolist()  # noqa
+
+    def __str__(self):
+        return f"MultiVectorFastEmbedModelAdapter(model_name={self._model.model_name})"

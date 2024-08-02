@@ -1,4 +1,3 @@
-import uuid
 from typing import Any, Dict, List, Optional
 
 from beir.retrieval.search import BaseSearch
@@ -22,15 +21,21 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         collection_name: str,
         initialize: bool = True,
         vector_name: str = "multi_vector",
+        search_params: Optional[models.SearchParams] = None,
         distance: models.Distance = models.Distance.COSINE,
         hnsw_config: Optional[models.HnswConfigDiff] = None,
         quantization_config: Optional[models.QuantizationConfig] = None,
         on_disk: Optional[bool] = None,
         datatype: Optional[models.Datatype] = None,
     ):
-        super().__init__(qdrant_client, model, collection_name, initialize)  # noqa
-        self.model = model
-        self.vector_name = vector_name
+        super().__init__(
+            qdrant_client,
+            model,  # noqa
+            collection_name,
+            initialize,
+            vector_name,
+            search_params,
+        )  # noqa
         self.distance = distance
         self.hnsw_config = hnsw_config
         self.quantization_config = quantization_config
@@ -38,6 +43,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         self.datatype = datatype
 
     def collection_config(self) -> Dict[str, Any]:
+        assert isinstance(self.model, BaseMultiVectorModelAdapter)
         test_embedding = self.model.embed_query("test")
         embedding_size = len(test_embedding[0])
 
@@ -56,14 +62,6 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
                     ),
                 )
             },
-        )
-
-    def doc_to_point(self, doc_id: str, doc: Dict[str, str]) -> models.PointStruct:
-        doc_embedding = self.model.embed_document(doc["text"])
-        return models.PointStruct(
-            id=uuid.uuid4().hex,
-            vector={self.vector_name: doc_embedding},
-            payload={"doc_id": doc_id, **doc},
         )
 
     def _str_params(self) -> List[str]:
