@@ -14,9 +14,7 @@ class ColbertModelAdapter(BaseMultiVectorModelAdapter):
     Adapter for the Colbert model. It provides multimple dense embeddings for both documents and queries.
     """
 
-    def __init__(
-        self, model_name: str, query_maxlen: int = 128, doc_maxlen: int = 8192
-    ):
+    def __init__(self, model_name: str, query_maxlen: int = 128, doc_maxlen: int = 512):
         self._model_name = model_name
         self._colbert_config = ColBERTConfig(
             query_maxlen=query_maxlen, doc_maxlen=doc_maxlen
@@ -32,4 +30,8 @@ class ColbertModelAdapter(BaseMultiVectorModelAdapter):
         return embeddings[0].tolist()
 
     def __str__(self):
-        return f"ColbertModelAdapter(model_name={self._model_name})"
+        return (
+            f"ColbertModelAdapter(model_name={self._model_name}, "
+            f"query_maxlen={self._colbert_config.query_maxlen}, "
+            f"doc_maxlen={self._colbert_config.doc_maxlen})"
+        )
