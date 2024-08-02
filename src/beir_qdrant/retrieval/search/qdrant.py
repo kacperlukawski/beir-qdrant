@@ -88,10 +88,22 @@ class QdrantBase(abc.ABC):
             tqdm(corpus_items, desc="Corpus indexing"), self.BATCH_SIZE
         ):
             documents = [Document(doc_id, doc) for doc_id, doc in batch]
+
+            init_time = time.perf_counter()
             points = self.docs_to_points(documents)
+            end_time = time.perf_counter()
+            logger.info(
+                f"Converted {len(points)} documents to points in {end_time - init_time:.8f} seconds"
+            )
+
+            init_time = time.perf_counter()
             self.qdrant_client.upload_points(
                 collection_name=self.collection_name,
                 points=points,
+            )
+            end_time = time.perf_counter()
+            logger.info(
+                f"Uploaded {len(points)} points in {end_time - init_time:.8f} seconds"
             )
 
     def recreate_collection(self):
@@ -137,11 +149,14 @@ class QdrantBase(abc.ABC):
         """
         time.sleep(self.SLEEP_INTERVAL)
         logger.info("Waiting for collection to be indexed")
+        init_time = time.perf_counter()
         collection_info = self.qdrant_client.get_collection(self.collection_name)
         while collection_info.status != models.CollectionStatus.GREEN:
             logger.info(f"Collection status: {collection_info.status}")
             time.sleep(self.SLEEP_INTERVAL)
             collection_info = self.qdrant_client.get_collection(self.collection_name)
+        end_time = time.perf_counter()
+        logger.info(f"Collection indexed in {end_time - init_time:.8f} seconds")
 
     def __str__(self):
         return f"{self.__class__.__name__}({', '.join(self._str_params())})"
