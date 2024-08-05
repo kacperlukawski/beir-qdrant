@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beir-qdrant"
-version = "0.3.2"
+version = "0.3.3"
 description = "Qdrant integration with BEIR, simplifying quality checks on standard datasets"
 authors = ["Kacper Łukawski <kacper.lukawski@qdrant.com>"]
 readme = "README.md"
