@@ -19,7 +19,7 @@ from beir_qdrant.retrieval.search.multi_vector import MultiVectorQdrantSearch
 from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
 
 # Configure basic logging (level INFO)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 
 # Disable httpx logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -47,6 +47,7 @@ searches = [
         collection_name=f"{dataset}-all-MiniLM-L6-v2",
         vector_name="all-MiniLM-L6-v2",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -63,6 +64,7 @@ searches = [
         collection_name=f"{dataset}-splade",
         vector_name="splade",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -76,6 +78,7 @@ searches = [
         collection_name=f"{dataset}-bm42",
         vector_name="bm42",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -89,6 +92,7 @@ searches = [
         collection_name=f"{dataset}-colbert-fastembed",
         vector_name="colbert-fastembed",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -99,11 +103,14 @@ searches = [
     MultiVectorQdrantSearch(
         qdrant_client,
         model=ColbertModelAdapter(
-            model_name="jinaai/jina-colbert-v1-en", doc_maxlen=8192
+            model_name="jinaai/jina-colbert-v1-en",
+            query_maxlen=512,
+            doc_maxlen=8192,
         ),
         collection_name=f"{dataset}-jina-colbert",
         vector_name="jina-colbert",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -113,10 +120,15 @@ searches = [
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
-        model=ColbertModelAdapter(model_name="colbert-ir/colbertv2.0"),
-        collection_name=f"{dataset}-colbert-fastembed",
+        model=ColbertModelAdapter(
+            model_name="colbert-ir/colbertv2.0",
+            query_maxlen=512,
+            doc_maxlen=512,
+        ),
+        collection_name=f"{dataset}-colbert",
         vector_name="colbert",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -132,6 +144,7 @@ searches = [
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings",
         vector_name="all-MiniLM-L6-v2-token-embeddings",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -142,11 +155,12 @@ searches = [
     MultiVectorQdrantSearch(
         qdrant_client,
         model=TokenEmbeddingsSentenceTransformerModelAdapter(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
         ),
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings-sq",
         vector_name="all-MiniLM-L6-v2-token-embeddings-sq",
         initialize=True,
+        clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
@@ -155,6 +169,9 @@ searches = [
         ),
         search_params=models.SearchParams(
             exact=True,
+            quantization=models.QuantizationSearchParams(
+                rescore=False,
+            ),
         ),
     ),
 ]
