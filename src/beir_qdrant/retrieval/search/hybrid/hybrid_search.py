@@ -25,11 +25,14 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
         qdrant_client: QdrantClient,
         collection_name: str,
         initialize: bool = True,
+        clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         searches: Optional[Iterable[SingleNamedVectorQdrantBase]] = None,
         search_params: Optional[models.SearchParams] = None,
     ):
-        super().__init__(qdrant_client, collection_name, initialize, optimizers_config)
+        super().__init__(
+            qdrant_client, collection_name, initialize, clean_up, optimizers_config
+        )
         self.searches = searches or []
         self.search_params = search_params
 

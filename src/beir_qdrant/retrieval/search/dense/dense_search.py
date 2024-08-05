@@ -18,6 +18,7 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         model: BaseDenseModelAdapter,
         collection_name: str,
         initialize: bool = True,
+        clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         vector_name: str = "sparse",
         search_params: Optional[models.SearchParams] = None,
@@ -32,6 +33,7 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             model,  # noqa
             collection_name,
             initialize,
+            clean_up,
             optimizers_config,
             vector_name,
             search_params,
@@ -63,8 +65,6 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
 
     def _str_params(self) -> List[str]:
         return super()._str_params() + [
-            f"model={self.model}",
-            f"vector_name={self.vector_name}",
             f"distance={self.distance}",
             f"hnsw_config={self.hnsw_config}",
             f"quantization_config={self.quantization_config}",
