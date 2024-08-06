@@ -12,8 +12,6 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     Multi-vector search, for example for late interaction models like ColBERT.
     """
 
-    BATCH_SIZE = 4
-
     def __init__(
         self,
         qdrant_client: QdrantClient,
@@ -22,6 +20,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         initialize: bool = True,
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
+        batch_size: int = 4,
         vector_name: str = "multi_vector",
         search_params: Optional[models.SearchParams] = None,
         distance: models.Distance = models.Distance.COSINE,
@@ -37,6 +36,7 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             initialize,
             clean_up,
             optimizers_config,
+            batch_size,
             vector_name,
             search_params,
         )
