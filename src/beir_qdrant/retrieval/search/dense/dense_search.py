@@ -20,6 +20,7 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         initialize: bool = True,
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
+        batch_size: int = 64,
         vector_name: str = "sparse",
         search_params: Optional[models.SearchParams] = None,
         distance: models.Distance = models.Distance.COSINE,
@@ -35,6 +36,7 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             initialize,
             clean_up,
             optimizers_config,
+            batch_size,
             vector_name,
             search_params,
         )

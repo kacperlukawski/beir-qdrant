@@ -18,8 +18,6 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
     embeddings and SPLADE model for sparse text embeddings. Both results are combined using a rank fusion algorithm.
     """
 
-    BATCH_SIZE = 4
-
     def __init__(
         self,
         qdrant_client: QdrantClient,
@@ -27,11 +25,17 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
         initialize: bool = True,
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
+        batch_size: int = 4,
         searches: Optional[Iterable[SingleNamedVectorQdrantBase]] = None,
         search_params: Optional[models.SearchParams] = None,
     ):
         super().__init__(
-            qdrant_client, collection_name, initialize, clean_up, optimizers_config
+            qdrant_client,
+            collection_name,
+            initialize,
+            clean_up,
+            optimizers_config,
+            batch_size,
         )
         self.searches = searches or []
         self.search_params = search_params

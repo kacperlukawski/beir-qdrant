@@ -22,10 +22,9 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
 
             use_cuda = torch.cuda.is_available()
             providers = ["CUDAExecutionProvider"] if use_cuda else None
+            self._model = TextEmbedding(model_name=model_name, providers=providers)
         except Exception:
-            providers = None
-
-        self._model = TextEmbedding(model_name=model_name, providers=providers)
+            self._model = TextEmbedding(model_name=model_name)
 
     def embed_documents(self, documents: List[str]) -> List[DenseVector]:
         embeddings = self._model.passage_embed(documents)
