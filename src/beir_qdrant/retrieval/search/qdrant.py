@@ -41,7 +41,6 @@ class QdrantBase(abc.ABC):
     """
 
     SLEEP_INTERVAL = 1.0
-    BATCH_SIZE = 64
 
     def __init__(
         self,
@@ -50,12 +49,14 @@ class QdrantBase(abc.ABC):
         initialize: bool = True,
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
+        batch_size: int = 64,
     ):
         self.qdrant_client = qdrant_client
         self.collection_name = collection_name
         self.initialize = initialize
         self.clean_up = clean_up
         self.optimizers_config = optimizers_config
+        self.batch_size = batch_size
 
     def search(
         self,
@@ -92,7 +93,7 @@ class QdrantBase(abc.ABC):
         # Iterate corpus in batches, not one by one
         corpus_items = corpus.items()
         for batch in batched(
-            tqdm(corpus_items, desc="Corpus indexing"), self.BATCH_SIZE
+            tqdm(corpus_items, desc="Corpus indexing"), self.batch_size
         ):
             documents = [Document(doc_id, doc) for doc_id, doc in batch]
 
@@ -192,11 +193,17 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         initialize: bool = True,
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
+        batch_size: int = 64,
         vector_name: str = "vector",
         search_params: Optional[models.SearchParams] = None,
     ):
         super().__init__(
-            qdrant_client, collection_name, initialize, clean_up, optimizers_config
+            qdrant_client,
+            collection_name,
+            initialize,
+            clean_up,
+            optimizers_config,
+            batch_size,
         )
         self.model = model
         self.vector_name = vector_name
