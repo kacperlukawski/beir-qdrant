@@ -15,7 +15,7 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     Sparse search using Qdrant and FastEmbed model. By default, it uses SPLADE model for sparse text embeddings.
     """
 
-    BATCH_SIZE = 16
+    DEFAULT_BATCH_SIZE = 16
 
     def __init__(
         self,
@@ -25,6 +25,7 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         initialize: bool = True,
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
+        batch_size: int = 64,
         vector_name: str = "sparse",
         search_params: Optional[models.SearchParams] = None,
         index: Optional[models.SparseVectorParams] = None,
@@ -37,6 +38,7 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
             initialize,
             clean_up,
             optimizers_config,
+            batch_size,
             vector_name,
             search_params,
         )
