@@ -41,7 +41,7 @@ class SentenceTransformerModelAdapter(BaseDenseModelAdapter):
         ).tolist()
 
     def __str__(self):
-        return f"SentenceTransformerModelAdapter(model_name={self._model.name})"
+        return f"SentenceTransformerModelAdapter(model_name={self._model.model_card_data.base_model})"
 
 
 class TokenEmbeddingsSentenceTransformerModelAdapter(BaseMultiVectorModelAdapter):
