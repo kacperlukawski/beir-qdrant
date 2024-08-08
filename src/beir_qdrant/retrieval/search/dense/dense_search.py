@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 from beir.retrieval.search import BaseSearch
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.model_adapter.base import BaseDenseModelAdapter
+from beir_qdrant.retrieval.models.base import BaseDenseModelAdapter
 from beir_qdrant.retrieval.search.qdrant import SingleNamedVectorQdrantBase
 
 
@@ -47,8 +47,8 @@ class DenseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         self.datatype = datatype
 
     def collection_config(self) -> Dict[str, Any]:
-        test_embedding = self.model.embed_query("test")
-        embedding_size = len(test_embedding)
+        test_embedding = self.model.encode_queries(["test"])
+        embedding_size = test_embedding.shape[1]
 
         return dict(
             collection_name=self.collection_name,

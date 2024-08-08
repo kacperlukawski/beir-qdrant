@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 from beir.retrieval.search import BaseSearch
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.model_adapter.base import BaseMultiVectorModelAdapter
+from beir_qdrant.retrieval.models.base import BaseMultiVectorModelAdapter
 from beir_qdrant.retrieval.search.qdrant import SingleNamedVectorQdrantBase
 
 
@@ -48,8 +48,8 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
 
     def collection_config(self) -> Dict[str, Any]:
         assert isinstance(self.model, BaseMultiVectorModelAdapter)
-        test_embedding = self.model.embed_query("test")
-        embedding_size = len(test_embedding[0])
+        test_embedding = self.model.encode_queries(["test"])
+        embedding_size = test_embedding[0].shape[1]
 
         return dict(
             collection_name=self.collection_name,
@@ -68,6 +68,9 @@ class MultiVectorQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
                 )
             },
         )
+
+    def convert_embeddings_to_qdrant_format(self, embeddings):
+        return [[vector.tolist() for vector in embedding] for embedding in embeddings]
 
     def _str_params(self) -> List[str]:
         return super()._str_params() + [

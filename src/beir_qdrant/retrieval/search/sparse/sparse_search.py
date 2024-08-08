@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from beir.retrieval.search import BaseSearch
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.model_adapter.base import BaseSparseModelAdapter
+from beir_qdrant.retrieval.models.base import BaseSparseModelAdapter
 from beir_qdrant.retrieval.search.qdrant import SingleNamedVectorQdrantBase
 
 logger = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     """
-    Sparse search using Qdrant and FastEmbed model. By default, it uses SPLADE model for sparse text embeddings.
+    Sparse search using Qdrant and FastEmbed model.
     """
 
     DEFAULT_BATCH_SIZE = 16
@@ -57,6 +57,20 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
                 )
             },
         )
+
+    def convert_embeddings_to_qdrant_format(self, embeddings):
+        """
+        Convert sparse matrix rows to SparseVector instances.
+        :param embeddings:
+        :return:
+        """
+        return [
+            models.SparseVector(
+                indices=embedding.indices.tolist(),
+                values=embedding.data.tolist(),
+            )
+            for embedding in embeddings
+        ]
 
     def _str_params(self) -> List[str]:
         return super()._str_params() + [
