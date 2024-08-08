@@ -91,6 +91,7 @@ class QdrantBase(abc.ABC):
         self.qdrant_client.upload_points(
             collection_name=self.collection_name,
             points=points,
+            batch_size=self.batch_size,
         )
         end_time = time.perf_counter()
         logger.info(f"Uploaded points in {end_time - init_time:.8f} seconds")

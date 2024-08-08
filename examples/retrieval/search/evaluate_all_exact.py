@@ -70,6 +70,7 @@ searches = [
         search_params=models.SearchParams(
             exact=True,
         ),
+        batch_size=8,
     ),
     DenseQdrantSearch(
         qdrant_client,
@@ -102,6 +103,7 @@ searches = [
         search_params=models.SearchParams(
             exact=True,
         ),
+        batch_size=8,
     ),
     DenseQdrantSearch(
         qdrant_client,
@@ -132,6 +134,7 @@ searches = [
         search_params=models.SearchParams(
             exact=True,
         ),
+        batch_size=8,
     ),
     # MultiVectorQdrantSearch(
     #     qdrant_client,
