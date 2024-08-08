@@ -5,13 +5,10 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.model_adapter.colbert import ColbertModelAdapter
-from beir_qdrant.retrieval.model_adapter.fastembed import (
-    DenseFastEmbedModelAdapter,
-    MultiVectorFastEmbedModelAdapter,
-    SparseFastEmbedModelAdapter,
-)
-from beir_qdrant.retrieval.model_adapter.sentence_transformers import (
+from beir_qdrant.retrieval.models.colbert import ColbertModelAdapter
+from beir_qdrant.retrieval.models.fastembed import SparseFastEmbedModelAdapter
+from beir_qdrant.retrieval.models.sentence_transformers import (
+    SentenceTransformerModelAdapter,
     TokenEmbeddingsSentenceTransformerModelAdapter,
 )
 from beir_qdrant.retrieval.search.dense import DenseQdrantSearch
@@ -35,29 +32,14 @@ data_path = util.download_and_unzip(url, "datasets")
 corpus, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="test")
 
 # Connect to Qdrant running on localhost
-qdrant_client = QdrantClient("http://localhost:6333")
+qdrant_client = QdrantClient(
+    "https://63f6b717-21da-45fd-90f3-b70de3b16060.germanywestcentral-0.azure.cloud.qdrant.io:6333",
+    api_key="Bs2UkYUbulQvulLXxpg-FbfMhtwrggEGqpivjAOd1aQ6JsVSx3km6w",
+    timeout=60,
+)
 
 # Create all the searches to compare
 searches = [
-    DenseQdrantSearch(
-        qdrant_client,
-        model=DenseFastEmbedModelAdapter(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-        ),
-        collection_name=f"{dataset}-all-MiniLM-L6-v2",
-        vector_name="all-MiniLM-L6-v2",
-        initialize=True,
-        clean_up=True,
-        optimizers_config=models.OptimizersConfigDiff(
-            indexing_threshold=1_000_000_000,
-        ),
-        quantization_config=models.BinaryQuantization(
-            binary=models.BinaryQuantizationConfig(always_ram=True)
-        ),
-        search_params=models.SearchParams(
-            exact=True,
-        ),
-    ),
     SparseQdrantSearch(
         qdrant_client,
         model=SparseFastEmbedModelAdapter(model_name="prithvida/Splade_PP_en_v1"),
@@ -72,57 +54,11 @@ searches = [
             exact=True,
         ),
     ),
-    SparseQdrantSearch(
-        qdrant_client,
-        model=SparseFastEmbedModelAdapter("Qdrant/bm42-all-minilm-l6-v2-attentions"),
-        collection_name=f"{dataset}-bm42",
-        vector_name="bm42",
-        initialize=True,
-        clean_up=True,
-        optimizers_config=models.OptimizersConfigDiff(
-            indexing_threshold=1_000_000_000,
-        ),
-        search_params=models.SearchParams(
-            exact=True,
-        ),
-    ),
-    MultiVectorQdrantSearch(
-        qdrant_client,
-        model=MultiVectorFastEmbedModelAdapter(model_name="colbert-ir/colbertv2.0"),
-        collection_name=f"{dataset}-colbert-fastembed",
-        vector_name="colbert-fastembed",
-        initialize=True,
-        clean_up=True,
-        optimizers_config=models.OptimizersConfigDiff(
-            indexing_threshold=1_000_000_000,
-        ),
-        search_params=models.SearchParams(
-            exact=True,
-        ),
-    ),
-    MultiVectorQdrantSearch(
-        qdrant_client,
-        model=ColbertModelAdapter(
-            model_name="jinaai/jina-colbert-v1-en",
-            query_maxlen=512,
-            doc_maxlen=8192,
-        ),
-        collection_name=f"{dataset}-jina-colbert",
-        vector_name="jina-colbert",
-        initialize=True,
-        clean_up=True,
-        optimizers_config=models.OptimizersConfigDiff(
-            indexing_threshold=1_000_000_000,
-        ),
-        search_params=models.SearchParams(
-            exact=True,
-        ),
-    ),
     MultiVectorQdrantSearch(
         qdrant_client,
         model=ColbertModelAdapter(
             model_name="colbert-ir/colbertv2.0",
-            query_maxlen=512,
+            query_maxlen=32,
             doc_maxlen=512,
         ),
         collection_name=f"{dataset}-colbert",
@@ -136,10 +72,26 @@ searches = [
             exact=True,
         ),
     ),
+    DenseQdrantSearch(
+        qdrant_client,
+        model=SentenceTransformerModelAdapter(
+            model_path="sentence-transformers/all-MiniLM-L6-v2"
+        ),
+        collection_name=f"{dataset}-all-MiniLM-L6-v2",
+        vector_name="all-MiniLM-L6-v2",
+        initialize=True,
+        clean_up=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
+        search_params=models.SearchParams(
+            exact=True,
+        ),
+    ),
     MultiVectorQdrantSearch(
         qdrant_client,
         model=TokenEmbeddingsSentenceTransformerModelAdapter(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+            model_path="sentence-transformers/all-MiniLM-L6-v2"
         ),
         collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings",
         vector_name="all-MiniLM-L6-v2-token-embeddings",
@@ -152,28 +104,54 @@ searches = [
             exact=True,
         ),
     ),
-    MultiVectorQdrantSearch(
+    DenseQdrantSearch(
         qdrant_client,
-        model=TokenEmbeddingsSentenceTransformerModelAdapter(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-        ),
-        collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings-sq",
-        vector_name="all-MiniLM-L6-v2-token-embeddings-sq",
+        model=SentenceTransformerModelAdapter(model_path="BAAI/bge-small-en"),
+        collection_name=f"{dataset}-BAAI-bge-small-en",
+        vector_name="BAAI-bge-small-en",
         initialize=True,
         clean_up=True,
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=1_000_000_000,
         ),
-        quantization_config=models.ScalarQuantization(
-            scalar=models.ScalarQuantizationConfig(type=models.ScalarType.INT8)
+        search_params=models.SearchParams(
+            exact=True,
+        ),
+    ),
+    MultiVectorQdrantSearch(
+        qdrant_client,
+        model=TokenEmbeddingsSentenceTransformerModelAdapter(
+            model_path="BAAI/bge-small-en"
+        ),
+        collection_name=f"{dataset}-BAAI-bge-small-en-token-embeddings",
+        vector_name="BAAI-bge-small-en-token-embeddings",
+        initialize=True,
+        clean_up=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
         ),
         search_params=models.SearchParams(
             exact=True,
-            quantization=models.QuantizationSearchParams(
-                rescore=False,
-            ),
         ),
     ),
+    # MultiVectorQdrantSearch(
+    #     qdrant_client,
+    #     model=TokenEmbeddingsSentenceTransformerModelAdapter(
+    #         model_name="sentence-transformers/all-MiniLM-L6-v2",
+    #         precision="uint8",
+    #     ),
+    #     collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings-uint8",
+    #     vector_name="all-MiniLM-L6-v2-token-embeddings-uint8",
+    #     initialize=True,
+    #     clean_up=True,
+    #     optimizers_config=models.OptimizersConfigDiff(
+    #         indexing_threshold=1_000_000_000,
+    #     ),
+    #     search_params=models.SearchParams(
+    #         exact=True,
+    #     ),
+    #     datatype=models.Datatype.UINT8,
+    # ),
 ]
 
 # Evaluate all the searches on the same test set
