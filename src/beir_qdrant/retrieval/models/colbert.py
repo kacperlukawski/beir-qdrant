@@ -35,24 +35,22 @@ class ColbertModelAdapter(BaseMultiVectorModelAdapter):
         **kwargs,
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
         texts = self._format_corpus(corpus)
-        embeddings = self._checkpoint.docFromText(texts, bsize=batch_size, **kwargs)
-        return [
-            Tensor(embedding_list)
-            for embedding_list in tqdm(
-                embeddings, total=len(texts), desc="Encoding corpus"
-            )
-        ]
+        embeddings = self._checkpoint.docFromText(
+            tqdm(texts, total=len(texts), desc="Encoding corpus"),
+            bsize=batch_size,
+            **kwargs,
+        )
+        return [Tensor(embedding_list) for embedding_list in embeddings]
 
     def encode_queries(
         self, queries: List[str], batch_size: int = 16, **kwargs
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
-        embeddings = self._checkpoint.queryFromText(queries, bsize=batch_size, **kwargs)
-        return [
-            Tensor(embedding_list)
-            for embedding_list in tqdm(
-                embeddings, total=len(queries), desc="Encoding queries"
-            )
-        ]
+        embeddings = self._checkpoint.queryFromText(
+            tqdm(queries, total=len(queries), desc="Encoding queries"),
+            bsize=batch_size,
+            **kwargs,
+        )
+        return [Tensor(embedding_list) for embedding_list in embeddings]
 
     def __str__(self):
         return (

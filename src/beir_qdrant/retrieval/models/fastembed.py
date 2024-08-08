@@ -86,16 +86,22 @@ class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
         **kwargs,
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
         texts = self._format_corpus(corpus)
-        embeddings = self._model.passage_embed(texts, batch_size=batch_size, **kwargs)
-        return self._to_sparse_matrix(tqdm(embeddings, total=len(texts), desc="Corpus"))
+        embeddings = self._model.passage_embed(
+            tqdm(texts, total=len(texts), desc="Encoding corpus"),
+            batch_size=batch_size,
+            **kwargs,
+        )
+        return self._to_sparse_matrix(embeddings)
 
     def encode_queries(
         self, queries: List[str], batch_size: int = 16, **kwargs
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
-        embeddings = self._model.query_embed(queries, batch_size=batch_size, **kwargs)
-        return self._to_sparse_matrix(
-            tqdm(embeddings, total=len(queries), desc="Queries")
+        embeddings = self._model.query_embed(
+            tqdm(queries, total=len(queries), desc="Encoding queries"),
+            batch_size=batch_size,
+            **kwargs,
         )
+        return self._to_sparse_matrix(embeddings)
 
     def _to_sparse_matrix(self, embeddings: Iterable[SparseEmbedding]) -> np.ndarray:
         """

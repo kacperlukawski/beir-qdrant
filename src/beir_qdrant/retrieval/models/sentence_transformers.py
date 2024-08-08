@@ -56,7 +56,7 @@ class SentenceTransformerModelAdapter(SentenceBERT, BaseDenseModelAdapter):
     def __str__(self):
         return (
             f"SentenceTransformerModelAdapter("
-            f"model_name={self._model.model_card_data.base_model}"
+            f"model_name={self.q_model.model_card_data.base_model}"
             f"document_prompt={self._document_prompt}"
             f"query_prompt={self._query_prompt}"
             f"precision={self._precision}"
@@ -103,7 +103,7 @@ class TokenEmbeddingsSentenceTransformerModelAdapter(BaseMultiVectorModelAdapter
     def __str__(self):
         return (
             f"TokenEmbeddingsSentenceTransformerModelAdapter("
-            f"model_name={self._model.model_card_data.base_model}, "
+            f"model_name={self._model.q_model.model_card_data.base_model}, "
             f"document_prompt={self._document_prompt}, "
             f"query_prompt={self._query_prompt}, "
             f"precision={self._precision}"

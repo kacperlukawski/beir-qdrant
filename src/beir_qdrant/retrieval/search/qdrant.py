@@ -200,7 +200,9 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         query_ids, query_texts = zip(*queries.items())
 
         init_time = time.perf_counter()
-        query_embeddings = self.model.encode_queries(query_texts)
+        query_embeddings = self.model.encode_queries(
+            query_texts, batch_size=self.batch_size
+        )
         end_time = time.perf_counter()
         logger.info(
             f"Encoded {len(query_ids)} queries in {end_time - init_time:.8f} seconds"
@@ -237,7 +239,7 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         self, corpus: Dict[str, Dict[str, str]]
     ) -> Iterable[models.PointStruct]:
         document_ids, documents = zip(*corpus.items())
-        embeddings = self.model.encode_corpus(documents)
+        embeddings = self.model.encode_corpus(documents, batch_size=self.batch_size)
 
         # Convert the embeddings to the Qdrant format
         embeddings = self.convert_embeddings_to_qdrant_format(embeddings)
