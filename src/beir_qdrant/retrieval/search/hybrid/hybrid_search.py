@@ -5,11 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from beir.retrieval.search import BaseSearch
 from qdrant_client import QdrantClient, models
 
-from beir_qdrant.retrieval.search.qdrant import (
-    Document,
-    QdrantBase,
-    SingleNamedVectorQdrantBase,
-)
+from beir_qdrant.retrieval.search.qdrant import QdrantBase, SingleNamedVectorQdrantBase
 
 
 class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
@@ -67,29 +63,23 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
 
         return merged_config
 
-    def docs_to_points(self, documents: List[Document]) -> List[models.PointStruct]:
-        if len(self.searches) == 0:
-            raise ValueError("No search models are provided")
+    def corpus_to_points(
+        self, corpus: Dict[str, Dict[str, str]]
+    ) -> Iterable[models.PointStruct]:
+        for subpoints in zip(
+            *[search.corpus_to_points(corpus) for search in self.searches]
+        ):
+            merged_vectors = {}
+            for point in subpoints:
+                for vector_name, vector in point.vector.items():
+                    merged_vectors[vector_name] = vector
 
-        # Create embeddings for all the documents in a single model call
-        texts = [doc.payload["text"] for doc in documents]
-        embeddings = {
-            search.vector_name: search.model.embed_documents(texts)
-            for search in self.searches
-        }
-
-        points = []
-        for doc_idx, doc in enumerate(documents):
             merged_point = models.PointStruct(
                 id=uuid.uuid4().hex,
-                vector={
-                    vector_name: embedding[doc_idx]
-                    for vector_name, embedding in embeddings.items()
-                },
-                payload={"doc_id": doc.id, **doc.payload},
+                vector=merged_vectors,
+                payload=subpoints[0].payload,
             )
-            points.append(merged_point)
-        return points
+            yield merged_point
 
     def _str_params(self) -> List[str]:
         return super()._str_params() + [
