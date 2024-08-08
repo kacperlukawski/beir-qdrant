@@ -2,14 +2,15 @@ import abc
 import logging
 import time
 import uuid
+from collections import defaultdict
 from dataclasses import dataclass
 from itertools import islice
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from qdrant_client import QdrantClient, models
 from tqdm import tqdm
 
-from beir_qdrant.retrieval.model_adapter.base import BaseModelAdapter
+from beir_qdrant.retrieval.models.base import BaseModelAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +73,7 @@ class QdrantBase(abc.ABC):
             self.await_indexing()
 
         # Run all the queries and collect the results
-        results = {}
-        for query_id, query in tqdm(queries.items(), desc="Queries"):
-            points = self.handle_query(query, top_k)
-            results[query_id] = {
-                point.payload["doc_id"]: point.score for point in points
-            }
+        results = self.handle_queries(queries, top_k)
 
         if self.clean_up:
             self.qdrant_client.delete_collection(self.collection_name)
@@ -90,29 +86,14 @@ class QdrantBase(abc.ABC):
         :param corpus:
         :return:
         """
-        # Iterate corpus in batches, not one by one
-        corpus_items = corpus.items()
-        for batch in batched(
-            tqdm(corpus_items, desc="Corpus indexing"), self.batch_size
-        ):
-            documents = [Document(doc_id, doc) for doc_id, doc in batch]
-
-            init_time = time.perf_counter()
-            points = self.docs_to_points(documents)
-            end_time = time.perf_counter()
-            logger.info(
-                f"Converted {len(points)} documents to points in {end_time - init_time:.8f} seconds"
-            )
-
-            init_time = time.perf_counter()
-            self.qdrant_client.upload_points(
-                collection_name=self.collection_name,
-                points=points,
-            )
-            end_time = time.perf_counter()
-            logger.info(
-                f"Uploaded {len(points)} points in {end_time - init_time:.8f} seconds"
-            )
+        points = self.corpus_to_points(corpus)
+        init_time = time.perf_counter()
+        self.qdrant_client.upload_points(
+            collection_name=self.collection_name,
+            points=points,
+        )
+        end_time = time.perf_counter()
+        logger.info(f"Uploaded points in {end_time - init_time:.8f} seconds")
 
     def recreate_collection(self):
         """
@@ -132,19 +113,23 @@ class QdrantBase(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def docs_to_points(self, documents: List[Document]) -> List[models.PointStruct]:
+    def corpus_to_points(
+        self, corpus: Dict[str, Dict[str, str]]
+    ) -> Iterable[models.PointStruct]:
         """
-        Convert a list of documents to Qdrant points.
-        :param documents:
+        Convert a corpus to Qdrant points.
+        :param corpus:
         :return:
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
+    def handle_queries(
+        self, queries: Dict[str, str], limit: int
+    ) -> Dict[str, Dict[str, float]]:
         """
-        Handle the query by searching the collection.
-        :param query:
+        Handle all the queries in the given iterable.
+        :param queries:
         :param limit:
         :return:
         """
@@ -209,40 +194,73 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         self.vector_name = vector_name
         self.search_params = search_params
 
-    def handle_query(self, query: str, limit: int) -> List[models.ScoredPoint]:
-        query_embedding = self.model.embed_query(query)
+    def handle_queries(
+        self, queries: Dict[str, str], limit: int
+    ) -> Dict[str, Dict[str, float]]:
+        query_ids, query_texts = zip(*queries.items())
+
         init_time = time.perf_counter()
-        result = self.qdrant_client.query_points(
-            collection_name=self.collection_name,
-            query=query_embedding,
-            using=self.vector_name,
-            limit=limit,
-            with_payload=True,
-            with_vectors=False,
-            search_params=self.search_params,
+        query_embeddings = self.model.encode_queries(query_texts)
+        end_time = time.perf_counter()
+        logger.info(
+            f"Encoded {len(query_ids)} queries in {end_time - init_time:.8f} seconds"
         )
+
+        # Convert the embeddings to the Qdrant format
+        query_embeddings = self.convert_embeddings_to_qdrant_format(query_embeddings)
+
+        results = defaultdict(dict)
+        init_time = time.perf_counter()
+        for query_id, query_embedding in tqdm(
+            zip(query_ids, query_embeddings), desc="Queries"
+        ):
+            query_results = self.qdrant_client.query_points(
+                collection_name=self.collection_name,
+                query=query_embedding,
+                using=self.vector_name,
+                limit=limit,
+                with_payload=True,
+                with_vectors=False,
+                search_params=self.search_params,
+            )
+            results[query_id] = {
+                point.payload["doc_id"]: point.score for point in query_results.points
+            }
         end_time = time.perf_counter()
         logger.info(
             f"Queried {self.collection_name} in {end_time - init_time:.8f} seconds"
         )
 
-        return result.points
+        return results
 
-    def docs_to_points(self, documents: List[Document]) -> List[models.PointStruct]:
-        # Create embeddings for all the documents in a single model call
-        texts = [doc.payload["text"] for doc in documents]
-        embeddings = self.model.embed_documents(texts)
+    def corpus_to_points(
+        self, corpus: Dict[str, Dict[str, str]]
+    ) -> Iterable[models.PointStruct]:
+        document_ids, documents = zip(*corpus.items())
+        embeddings = self.model.encode_corpus(documents)
 
-        points = []
-        for doc, embedding in zip(documents, embeddings):
-            points.append(
-                models.PointStruct(
-                    id=uuid.uuid4().hex,
-                    vector={self.vector_name: embedding},
-                    payload={"doc_id": doc.id, **doc.payload},
-                )
+        # Convert the embeddings to the Qdrant format
+        embeddings = self.convert_embeddings_to_qdrant_format(embeddings)
+
+        for document_idx, (document_id, document_embedding) in tqdm(
+            enumerate(zip(document_ids, embeddings)),
+            total=len(document_ids),
+            desc="Corpus",
+        ):
+            yield models.PointStruct(
+                id=uuid.uuid4().hex,
+                vector={self.vector_name: document_embedding},
+                payload={"doc_id": document_id, **documents[document_idx]},
             )
-        return points
+
+    def convert_embeddings_to_qdrant_format(self, embeddings):
+        """
+        Convert the query embeddings to the Qdrant format. This is a no-op for single vector searches.
+        Some of the methods in the derived classes may require this conversion.
+        :param embeddings:
+        :return:
+        """
+        return embeddings
 
     def _str_params(self) -> List[str]:
         return super()._str_params() + [

@@ -5,7 +5,7 @@ from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from qdrant_client import QdrantClient
 
-from beir_qdrant.retrieval.model_adapter.fastembed import SparseFastEmbedModelAdapter
+from beir_qdrant.retrieval.models.fastembed import SparseFastEmbedModelAdapter
 from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
 
 # Set up logging
