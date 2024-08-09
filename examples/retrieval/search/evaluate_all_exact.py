@@ -136,24 +136,24 @@ searches = [
         ),
         batch_size=8,
     ),
-    # MultiVectorQdrantSearch(
-    #     qdrant_client,
-    #     model=TokenEmbeddingsSentenceTransformerModelAdapter(
-    #         model_name="sentence-transformers/all-MiniLM-L6-v2",
-    #         precision="uint8",
-    #     ),
-    #     collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings-uint8",
-    #     vector_name="all-MiniLM-L6-v2-token-embeddings-uint8",
-    #     initialize=True,
-    #     clean_up=True,
-    #     optimizers_config=models.OptimizersConfigDiff(
-    #         indexing_threshold=1_000_000_000,
-    #     ),
-    #     search_params=models.SearchParams(
-    #         exact=True,
-    #     ),
-    #     datatype=models.Datatype.UINT8,
-    # ),
+    MultiVectorQdrantSearch(
+        qdrant_client,
+        model=TokenEmbeddingsSentenceTransformerModelAdapter(
+            model_path="sentence-transformers/all-MiniLM-L6-v2",
+            precision="uint8",
+        ),
+        collection_name=f"{dataset}-all-MiniLM-L6-v2-token-embeddings-uint8",
+        vector_name="all-MiniLM-L6-v2-token-embeddings-uint8",
+        initialize=True,
+        clean_up=True,
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=1_000_000_000,
+        ),
+        search_params=models.SearchParams(
+            exact=True,
+        ),
+        datatype=models.Datatype.UINT8,
+    ),
 ]
 
 # Evaluate all the searches on the same test set

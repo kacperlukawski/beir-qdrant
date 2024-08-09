@@ -26,6 +26,7 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         batch_size: int = 64,
+        model_batch_size: Optional[int] = None,
         vector_name: str = "sparse",
         search_params: Optional[models.SearchParams] = None,
         index: Optional[models.SparseVectorParams] = None,
@@ -33,12 +34,13 @@ class SparseQdrantSearch(SingleNamedVectorQdrantBase, BaseSearch):
     ):
         super().__init__(
             qdrant_client,
-            model,  # noqa
+            model,
             collection_name,
             initialize,
             clean_up,
             optimizers_config,
             batch_size,
+            model_batch_size,
             vector_name,
             search_params,
         )

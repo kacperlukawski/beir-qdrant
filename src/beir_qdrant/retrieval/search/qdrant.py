@@ -51,6 +51,7 @@ class QdrantBase(abc.ABC):
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         batch_size: int = 64,
+        model_batch_size: Optional[int] = None,
     ):
         self.qdrant_client = qdrant_client
         self.collection_name = collection_name
@@ -58,6 +59,7 @@ class QdrantBase(abc.ABC):
         self.clean_up = clean_up
         self.optimizers_config = optimizers_config
         self.batch_size = batch_size
+        self.model_batch_size = model_batch_size or batch_size
 
     def search(
         self,
@@ -180,6 +182,7 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         batch_size: int = 64,
+        model_batch_size: Optional[int] = None,
         vector_name: str = "vector",
         search_params: Optional[models.SearchParams] = None,
     ):
@@ -240,7 +243,9 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         self, corpus: Dict[str, Dict[str, str]]
     ) -> Iterable[models.PointStruct]:
         document_ids, documents = zip(*corpus.items())
-        embeddings = self.model.encode_corpus(documents, batch_size=self.batch_size)
+        embeddings = self.model.encode_corpus(
+            documents, batch_size=self.model_batch_size
+        )
 
         # Convert the embeddings to the Qdrant format
         embeddings = self.convert_embeddings_to_qdrant_format(embeddings)

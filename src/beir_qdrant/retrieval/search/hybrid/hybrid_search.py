@@ -22,6 +22,7 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
         clean_up: bool = False,
         optimizers_config: Optional[models.OptimizersConfigDiff] = None,
         batch_size: int = 4,
+        model_batch_size: Optional[int] = None,
         searches: Optional[Iterable[SingleNamedVectorQdrantBase]] = None,
         search_params: Optional[models.SearchParams] = None,
     ):
@@ -32,6 +33,7 @@ class HybridQdrantSearch(QdrantBase, BaseSearch, abc.ABC):
             clean_up,
             optimizers_config,
             batch_size,
+            model_batch_size,
         )
         self.searches = searches or []
         self.search_params = search_params
