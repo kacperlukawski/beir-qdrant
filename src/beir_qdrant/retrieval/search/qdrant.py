@@ -215,7 +215,7 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
         results = defaultdict(dict)
         init_time = time.perf_counter()
         for query_id, query_embedding in tqdm(
-            zip(query_ids, query_embeddings), desc="Queries"
+            zip(query_ids, query_embeddings), total=len(query_ids), desc="Queries"
         ):
             query_results = self.qdrant_client.query_points(
                 collection_name=self.collection_name,

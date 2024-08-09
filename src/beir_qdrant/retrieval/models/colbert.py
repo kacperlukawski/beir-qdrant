@@ -4,7 +4,6 @@ import numpy as np
 from colbert.infra import ColBERTConfig
 from colbert.modeling.checkpoint import Checkpoint
 from torch import Tensor
-from tqdm import tqdm
 
 from beir_qdrant.retrieval.models.base import BaseMultiVectorModelAdapter
 
@@ -36,17 +35,17 @@ class ColbertModelAdapter(BaseMultiVectorModelAdapter):
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
         texts = self._format_corpus(corpus)
         embeddings = self._checkpoint.docFromText(
-            tqdm(texts, total=len(texts), desc="Encoding corpus"),
+            texts,
             bsize=batch_size,
             **kwargs,
         )
-        return [Tensor(embedding_list) for embedding_list in embeddings]
+        return [Tensor(embedding_list) for embedding_list in embeddings[0]]
 
     def encode_queries(
         self, queries: List[str], batch_size: int = 16, **kwargs
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
         embeddings = self._checkpoint.queryFromText(
-            tqdm(queries, total=len(queries), desc="Encoding queries"),
+            queries,
             bsize=batch_size,
             **kwargs,
         )

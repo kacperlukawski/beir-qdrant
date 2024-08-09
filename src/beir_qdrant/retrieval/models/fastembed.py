@@ -57,7 +57,7 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
         )
 
     def __str__(self):
-        return f"DenseFastEmbedModelAdapter(model_name={self._model.model_name})"
+        return f"DenseFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
 
 
 class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
@@ -117,10 +117,10 @@ class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
             )
         )
         cols = list(itertools.chain(*[embedding.indices for embedding in embeddings]))
-        return sp.sparse.csr_array((data, (rows, cols)))
+        return sp.sparse.csr_array((data, (rows, cols)))  # noqa
 
     def __str__(self):
-        return f"SparseFastEmbedModelAdapter(model_name={self._model.model_name})"
+        return f"SparseFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
 
 
 class MultiVectorFastEmbedModelAdapter(BaseMultiVectorModelAdapter):
@@ -169,4 +169,4 @@ class MultiVectorFastEmbedModelAdapter(BaseMultiVectorModelAdapter):
         ]
 
     def __str__(self):
-        return f"MultiVectorFastEmbedModelAdapter(model_name={self._model.model_name})"
+        return f"MultiVectorFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"

@@ -137,3 +137,24 @@ def test_multi_vector_model_encode_corpus_as_list_of_tensors(
     assert embeddings[0].shape[1] == 128
     assert embeddings[1].shape[1] == 128
     assert embeddings[2].shape[1] == 128
+
+
+def test_dense_model_casts_to_string_properly(
+    dense_model: DenseFastEmbedModelAdapter,
+):
+    model_str = str(dense_model)
+    assert model_str is not None
+
+
+def test_sparse_model_casts_to_string_properly(
+    sparse_model: SparseFastEmbedModelAdapter,
+):
+    model_str = str(sparse_model)
+    assert model_str is not None
+
+
+def test_multi_vector_model_casts_to_string_properly(
+    multi_vector_model: MultiVectorFastEmbedModelAdapter,
+):
+    model_str = str(multi_vector_model)
+    assert model_str is not None
