@@ -47,6 +47,30 @@ def multi_vector_model() -> MultiVectorFastEmbedModelAdapter:
     return MultiVectorFastEmbedModelAdapter(model_name="colbert-ir/colbertv2.0")
 
 
+def test_search_indexes_all_documents(
+    qdrant_client: QdrantClient, dense_model: DenseFastEmbedModelAdapter
+):
+    model = DenseQdrantSearch(
+        qdrant_client,
+        model=dense_model,
+        collection_name="my-collection",
+        vector_name="vector",
+        initialize=True,
+        clean_up=False,
+    )
+
+    corpus = {
+        "1": {"id": "1", "text": "Paris is the capital of France."},
+        "2": {"id": "2", "text": "Washington is the capital of the USA."},
+    }
+    queries = {
+        "1": "What is the capital of France?",
+    }
+    model.search(corpus, queries, top_k=1)
+
+    assert qdrant_client.count("my-collection").count == 2
+
+
 @pytest.mark.integration
 def test_dense_model_search_integration(
     data_loader: GenericDataLoader,

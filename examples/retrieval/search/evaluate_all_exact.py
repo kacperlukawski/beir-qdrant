@@ -53,7 +53,7 @@ searches = [
             exact=True,
         ),
         batch_size=128,
-        model_batch_size=1024,
+        model_batch_size=128,
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -73,7 +73,7 @@ searches = [
             exact=True,
         ),
         batch_size=8,
-        model_batch_size=1024,
+        model_batch_size=128,
     ),
     DenseQdrantSearch(
         qdrant_client,
@@ -91,7 +91,7 @@ searches = [
             exact=True,
         ),
         batch_size=128,
-        model_batch_size=1024,
+        model_batch_size=128,
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -109,7 +109,7 @@ searches = [
             exact=True,
         ),
         batch_size=8,
-        model_batch_size=1024,
+        model_batch_size=128,
     ),
     DenseQdrantSearch(
         qdrant_client,
@@ -125,7 +125,7 @@ searches = [
             exact=True,
         ),
         batch_size=128,
-        model_batch_size=1024,
+        model_batch_size=128,
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -143,7 +143,7 @@ searches = [
             exact=True,
         ),
         batch_size=8,
-        model_batch_size=1024,
+        model_batch_size=128,
     ),
     MultiVectorQdrantSearch(
         qdrant_client,
@@ -163,7 +163,7 @@ searches = [
         ),
         datatype=models.Datatype.UINT8,
         batch_size=16,
-        model_batch_size=1024,
+        model_batch_size=128,
     ),
 ]
 
