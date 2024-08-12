@@ -245,12 +245,11 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
     ) -> Iterable[models.PointStruct]:
         corpus_items = corpus.items()
 
-        batch_idx = 0
         num_total_batches = len(corpus_items) // self.model_batch_size + 1
         for corpus_batch in tqdm(
             batched(corpus_items, self.model_batch_size),
             total=num_total_batches,
-            desc=f"Documents batch [{batch_idx + 1}/{num_total_batches}]",
+            desc="Corpus batches",
         ):
             document_ids, documents = zip(*corpus_batch)
 
@@ -261,18 +260,14 @@ class SingleNamedVectorQdrantBase(QdrantBase, abc.ABC):
             # Convert the embeddings to the Qdrant format
             embeddings = self.convert_embeddings_to_qdrant_format(embeddings)
 
-            for document_idx, (document_id, document_embedding) in tqdm(
-                enumerate(zip(document_ids, embeddings)),
-                total=len(document_ids),
-                desc="Corpus",
+            for document_idx, (document_id, document_embedding) in enumerate(
+                zip(document_ids, embeddings)
             ):
                 yield models.PointStruct(
                     id=uuid.uuid4().hex,
                     vector={self.vector_name: document_embedding},
                     payload={"doc_id": document_id, **documents[document_idx]},
                 )
-
-            batch_idx += 1
 
     def convert_embeddings_to_qdrant_format(self, embeddings):
         """
