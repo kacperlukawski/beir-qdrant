@@ -62,6 +62,11 @@ class QdrantBase(BaseSearch, abc.ABC):
         self.batch_size = batch_size
         self.model_batch_size = model_batch_size or batch_size
 
+        # This flag is used to check if the collection was priorly initialized. There is no point in doing the
+        # initialization twice, and storing that information saves a lot of time if we, e.g., use in-memory multi vector
+        # reranking. Then, we can just rerank the results without the need to reinitialize the collection.
+        self.is_initialized = False
+
     def search(
         self,
         corpus: Dict[str, Dict[str, str]],
@@ -70,10 +75,11 @@ class QdrantBase(BaseSearch, abc.ABC):
         *args,
         **kwargs,
     ) -> Dict[str, Dict[str, float]]:
-        if self.initialize:
+        if self.initialize and not self.is_initialized:
             self.recreate_collection()
             self.index_corpus(corpus)
             self.await_indexing()
+            self.is_initialized = True
 
         # Run all the queries and collect the results
         results = self.handle_queries(queries, top_k)
