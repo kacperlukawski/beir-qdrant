@@ -38,42 +38,64 @@ qdrant_client = QdrantClient(
 )
 
 # Create all the search pipelines working as oversampled retrievers
-base_searches = [
-    DenseQdrantSearch(
-        qdrant_client,
-        model=SentenceTransformerModelAdapter(
-            model_path="sentence-transformers/all-MiniLM-L6-v2"
+searches = [
+    MultiVectorReranking(
+        # This is the initial retriever that is used to oversample the search results.
+        oversample_search=DenseQdrantSearch(
+            qdrant_client,
+            model=SentenceTransformerModelAdapter(
+                model_path="sentence-transformers/all-MiniLM-L6-v2"
+            ),
+            collection_name=f"{dataset}-all-MiniLM-L6-v2",
+            vector_name="all-MiniLM-L6-v2",
+            initialize=True,
+            clean_up=True,
+            optimizers_config=models.OptimizersConfigDiff(
+                indexing_threshold=1_000_000_000,
+            ),
+            search_params=models.SearchParams(
+                exact=True,
+            ),
+            batch_size=128,
+            model_batch_size=128,
         ),
-        collection_name=f"{dataset}-all-MiniLM-L6-v2",
-        vector_name="all-MiniLM-L6-v2",
-        initialize=True,
-        clean_up=True,
-        optimizers_config=models.OptimizersConfigDiff(
-            indexing_threshold=1_000_000_000,
+        # Reranking model is then used in memory to rescore the oversampled results.
+        rerank_model=TokenEmbeddingsSentenceTransformerModelAdapter(
+            model_path="sentence-transformers/all-MiniLM-L6-v2",
+            # precision="uint8",
         ),
-        search_params=models.SearchParams(
-            exact=True,
+        oversample_factor=5,
+    ),
+    MultiVectorReranking(
+        # This is the initial retriever that is used to oversample the search results.
+        oversample_search=DenseQdrantSearch(
+            qdrant_client,
+            model=SentenceTransformerModelAdapter(model_path="BAAI/bge-small-en"),
+            collection_name=f"{dataset}-all-MiniLM-L6-v2",
+            vector_name="all-MiniLM-L6-v2",
+            initialize=True,
+            clean_up=True,
+            optimizers_config=models.OptimizersConfigDiff(
+                indexing_threshold=1_000_000_000,
+            ),
+            search_params=models.SearchParams(
+                exact=True,
+            ),
+            batch_size=128,
+            model_batch_size=128,
         ),
-        batch_size=128,
-        model_batch_size=128,
+        # Reranking model is then used in memory to rescore the oversampled results.
+        rerank_model=TokenEmbeddingsSentenceTransformerModelAdapter(
+            model_path="BAAI/bge-small-en",
+            # precision="uint8",
+        ),
+        oversample_factor=5,
     ),
 ]
 
-# Define the multi-vector model to rerank the search results
-reranker = TokenEmbeddingsSentenceTransformerModelAdapter(
-    model_path="sentence-transformers/all-MiniLM-L6-v2",
-    # precision="uint8",
-)
-
-# Evaluate all the base_searches on the same test set
-for oversample_model in base_searches:
-    reranking_model = MultiVectorReranking(
-        oversample_search=oversample_model,
-        rerank_model=reranker,
-        oversample_factor=5,
-    )
-
-    retriever = EvaluateRetrieval(reranking_model, k_values=[10])
+# Evaluate all the searches on the same test set
+for model in searches:
+    retriever = EvaluateRetrieval(model, k_values=[10])
     results = retriever.retrieve(corpus, queries)
 
     ndcg, _map, recall, precision = retriever.evaluate(
@@ -81,7 +103,7 @@ for oversample_model in base_searches:
     )
 
     # Display the evaluation results
-    print(f"Evaluation Results of model {oversample_model}:")
+    print(f"Evaluation Results of model {model}:")
     print("NDCG@k:", ndcg)
     print("MAP@K:", _map)
     print("Recall@K:", recall)

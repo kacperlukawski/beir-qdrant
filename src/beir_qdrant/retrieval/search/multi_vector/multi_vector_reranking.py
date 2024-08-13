@@ -98,3 +98,13 @@ class MultiVectorReranking(BaseSearch):
         similarities = cos_sim(query_embeddings, document_embeddings).cpu().numpy()
         max_similarities = np.max(similarities, axis=1)
         return np.sum(max_similarities).tolist()
+
+    def __str__(self) -> str:
+        return (
+            f"MultiVectorReranking("
+            f"oversample_search={self.oversample_search}, "
+            f"rerank_model={self.rerank_model}, "
+            f"oversample_factor={self.oversample_factor}, "
+            f"clean_up={self.clean_up}"
+            f")"
+        )
