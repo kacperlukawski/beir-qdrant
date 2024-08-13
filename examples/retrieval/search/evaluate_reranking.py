@@ -37,28 +37,49 @@ qdrant_client = QdrantClient(
     timeout=60,
 )
 
-# Create all the search pipelines working as oversampled retrievers
+# Both all-MiniLM-L6-v2 and BAAI-bge-small-en models are used as oversampled retrievers
+oversample_search_st = DenseQdrantSearch(
+    qdrant_client,
+    model=SentenceTransformerModelAdapter(
+        model_path="sentence-transformers/all-MiniLM-L6-v2"
+    ),
+    collection_name=f"{dataset}-all-MiniLM-L6-v2",
+    vector_name="all-MiniLM-L6-v2",
+    initialize=True,
+    clean_up=False,
+    optimizers_config=models.OptimizersConfigDiff(
+        indexing_threshold=1_000_000_000,
+    ),
+    search_params=models.SearchParams(
+        exact=True,
+    ),
+    batch_size=128,
+    model_batch_size=128,
+)
+
+oversample_search_bge = DenseQdrantSearch(
+    qdrant_client,
+    model=SentenceTransformerModelAdapter(model_path="BAAI/bge-small-en"),
+    collection_name=f"{dataset}-BAAI-bge-small-en",
+    vector_name="BAAI-bge-small-en",
+    initialize=True,
+    clean_up=False,
+    optimizers_config=models.OptimizersConfigDiff(
+        indexing_threshold=1_000_000_000,
+    ),
+    search_params=models.SearchParams(
+        exact=True,
+    ),
+    batch_size=128,
+    model_batch_size=128,
+)
+
+# Create all the search pipelines with the oversampled retrievers
 searches = [
+    oversample_search_st,
     MultiVectorReranking(
         # This is the initial retriever that is used to oversample the search results.
-        oversample_search=DenseQdrantSearch(
-            qdrant_client,
-            model=SentenceTransformerModelAdapter(
-                model_path="sentence-transformers/all-MiniLM-L6-v2"
-            ),
-            collection_name=f"{dataset}-all-MiniLM-L6-v2",
-            vector_name="all-MiniLM-L6-v2",
-            initialize=True,
-            clean_up=True,
-            optimizers_config=models.OptimizersConfigDiff(
-                indexing_threshold=1_000_000_000,
-            ),
-            search_params=models.SearchParams(
-                exact=True,
-            ),
-            batch_size=128,
-            model_batch_size=128,
-        ),
+        oversample_search=oversample_search_st,
         # Reranking model is then used in memory to rescore the oversampled results.
         rerank_model=TokenEmbeddingsSentenceTransformerModelAdapter(
             model_path="sentence-transformers/all-MiniLM-L6-v2",
@@ -66,24 +87,10 @@ searches = [
         ),
         oversample_factor=5,
     ),
+    oversample_search_bge,
     MultiVectorReranking(
         # This is the initial retriever that is used to oversample the search results.
-        oversample_search=DenseQdrantSearch(
-            qdrant_client,
-            model=SentenceTransformerModelAdapter(model_path="BAAI/bge-small-en"),
-            collection_name=f"{dataset}-BAAI-bge-small-en",
-            vector_name="BAAI-bge-small-en",
-            initialize=True,
-            clean_up=True,
-            optimizers_config=models.OptimizersConfigDiff(
-                indexing_threshold=1_000_000_000,
-            ),
-            search_params=models.SearchParams(
-                exact=True,
-            ),
-            batch_size=128,
-            model_batch_size=128,
-        ),
+        oversample_search=oversample_search_bge,
         # Reranking model is then used in memory to rescore the oversampled results.
         rerank_model=TokenEmbeddingsSentenceTransformerModelAdapter(
             model_path="BAAI/bge-small-en",
