@@ -155,7 +155,7 @@ class QdrantBase(BaseSearch, abc.ABC):
         end_time = time.perf_counter()
         logger.info(f"Collection indexed in {end_time - init_time:.8f} seconds")
 
-    def get_by_document_id(self, doc_id: str) -> Optional[dict]:
+    def get_documents(self, doc_ids: List[str]) -> List[dict]:
         """
         Get the document by its id.
         :return:
@@ -166,19 +166,21 @@ class QdrantBase(BaseSearch, abc.ABC):
                 must=[
                     models.FieldCondition(
                         key="doc_id",
-                        match=models.MatchValue(
-                            value=doc_id,
+                        match=models.MatchAny(
+                            any=doc_ids,
                         ),
                     )
                 ]
             ),
             with_payload=True,
             with_vectors=False,
+            limit=len(doc_ids),
         )
-        if len(points) == 0:
-            return None
 
-        return points[0].payload
+        # Order the documents based on the input order
+        document = [point.payload for point in points]
+        doc_id_to_doc = {doc["doc_id"]: doc for doc in document}
+        return [doc_id_to_doc[doc_id] for doc_id in doc_ids]
 
     def __str__(self):
         return f"{self.__class__.__name__}({', '.join(self._str_params())})"

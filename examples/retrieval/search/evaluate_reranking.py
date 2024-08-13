@@ -71,8 +71,8 @@ searches = [
         oversample_search=DenseQdrantSearch(
             qdrant_client,
             model=SentenceTransformerModelAdapter(model_path="BAAI/bge-small-en"),
-            collection_name=f"{dataset}-all-MiniLM-L6-v2",
-            vector_name="all-MiniLM-L6-v2",
+            collection_name=f"{dataset}-BAAI-bge-small-en",
+            vector_name="BAAI-bge-small-en",
             initialize=True,
             clean_up=True,
             optimizers_config=models.OptimizersConfigDiff(
