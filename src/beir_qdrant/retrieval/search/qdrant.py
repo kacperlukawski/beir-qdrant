@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from itertools import islice
 from typing import Any, Dict, Iterable, List, Optional
 
+from beir.retrieval.search import BaseSearch
 from qdrant_client import QdrantClient, models
 from tqdm import tqdm
 
@@ -36,7 +37,7 @@ class Document:
     payload: Dict[str, str]
 
 
-class QdrantBase(abc.ABC):
+class QdrantBase(BaseSearch, abc.ABC):
     """
     Base class for Qdrant based search.
     """
@@ -153,6 +154,31 @@ class QdrantBase(abc.ABC):
             collection_info = self.qdrant_client.get_collection(self.collection_name)
         end_time = time.perf_counter()
         logger.info(f"Collection indexed in {end_time - init_time:.8f} seconds")
+
+    def get_by_document_id(self, doc_id: str) -> Optional[dict]:
+        """
+        Get the document by its id.
+        :return:
+        """
+        points, _ = self.qdrant_client.scroll(
+            collection_name=self.collection_name,
+            scroll_filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="doc_id",
+                        match=models.MatchValue(
+                            value=doc_id,
+                        ),
+                    )
+                ]
+            ),
+            with_payload=True,
+            with_vectors=False,
+        )
+        if len(points) == 0:
+            return None
+
+        return points[0].payload
 
     def __str__(self):
         return f"{self.__class__.__name__}({', '.join(self._str_params())})"
