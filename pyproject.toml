@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beir-qdrant"
-version = "0.5.2"
+version = "0.5.3"
 description = "Qdrant integration with BEIR, simplifying quality checks on standard datasets"
 authors = ["Kacper Łukawski <kacper.lukawski@qdrant.com>"]
 readme = "README.md"
@@ -23,6 +23,9 @@ fastembed-gpu = "^0.3.4"
 pytest = "^8.2.2"
 ruff = "^0.4.10"
 pre-commit = "^3.7.1"
+mkdocs = "^1.6.1"
+mkdocstrings-python = "^1.11.1"
+mkdocs-material = {extras = ["imaging"], version = "^9.5.34"}
 
 [tool.pytest.ini_options]
 minversion = "7.1"
@@ -32,6 +35,9 @@ pythonpath = [
 testpaths = [
     "tests/"
 ]
+
+[tool.ruff]
+lint.typing-modules = ["cibuildwheel.typing"]
 
 [build-system]
 requires = ["poetry-core"]
