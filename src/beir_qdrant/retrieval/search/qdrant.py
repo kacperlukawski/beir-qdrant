@@ -111,7 +111,8 @@ class QdrantBase(BaseSearch, abc.ABC):
         :return:
         """
         collection_config = self.collection_config()
-        self.qdrant_client.delete_collection(self.collection_name)
+        if self.qdrant_client.collection_exists(self.collection_name):
+            self.qdrant_client.delete_collection(self.collection_name)
         self.qdrant_client.create_collection(**collection_config)
 
     @abc.abstractmethod
