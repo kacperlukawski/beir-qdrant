@@ -5,6 +5,7 @@ import numpy as np
 import scipy as sp
 from fastembed import (
     LateInteractionTextEmbedding,
+    MuveraEmbedding,
     SparseEmbedding,
     SparseTextEmbedding,
     TextEmbedding,
@@ -58,6 +59,24 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
 
     def __str__(self):
         return f"DenseFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
+
+
+class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
+    """
+    Adapter for the FastEmbed Muvera embedding models.
+    """
+
+    def __init__(self, model_name: str, sep: str = ""):
+        super().__init__(sep=sep)
+
+        try:
+            import torch
+
+            use_cuda = torch.cuda.is_available()
+            providers = ["CUDAExecutionProvider"] if use_cuda else None
+            self._model = MuveraEmbedding(model_name=model_name, providers=providers)
+        except Exception:
+            self._model = MuveraEmbedding(model_name=model_name)
 
 
 class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):

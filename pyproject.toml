@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beir-qdrant"
-version = "0.5.4"
+version = "0.5.3"
 description = "Qdrant integration with BEIR, simplifying quality checks on standard datasets"
 authors = ["Kacper Łukawski <kacper.lukawski@qdrant.com>"]
 readme = "README.md"
@@ -11,13 +11,13 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "<3.13,>=3.10.0"
-beir = "^2.0.0,<2.1.0"
-fastembed = "^0.3.1"
-qdrant-client = "^1.10.0"
+python = "<3.14,>=3.10.0"
+beir = "2.0.0"
+fastembed = {git = "https://github.com/kacperlukawski/fastembed.git", rev = "feature/muvera-embedding"}
+qdrant-client = "^1.13.0"
 transformers = "^4.43.3,<4.45.0"
 colbert-ai = "^0.2.20"
-fastembed-gpu = "^0.3.4"
+fastembed-gpu = "^0.7.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
