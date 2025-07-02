@@ -61,12 +61,14 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
         return f"DenseFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
 
 
-class MuveraFastEmbedModelAdapter(DenseFastEmbedModelAdapter):
+class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
     """
     Adapter for the FastEmbed Muvera embedding models.
     """
 
     def __init__(self, model_name: str, sep: str = ""):  # noqa
+        super().__init__(sep=sep)
+
         try:
             import torch
 
@@ -75,6 +77,29 @@ class MuveraFastEmbedModelAdapter(DenseFastEmbedModelAdapter):
             self._model = MuveraEmbedding(model_name=model_name, providers=providers)
         except Exception:
             self._model = MuveraEmbedding(model_name=model_name)
+
+    def encode_corpus(
+        self,
+        corpus: Union[List[Dict[str, str]], Dict[str, List]],
+        batch_size: int = 8,
+        **kwargs,
+    ) -> Union[List[Tensor], np.ndarray, Tensor]:
+        texts = self._format_corpus(corpus)
+        embeddings = self._model.passage_embed(texts, batch_size=batch_size, **kwargs)
+        return np.array(
+            list(tqdm(embeddings, total=len(texts), desc="Encoding corpus"))
+        )
+
+    def encode_queries(
+        self, queries: List[str], batch_size: int = 16, **kwargs
+    ) -> Union[List[Tensor], np.ndarray, Tensor]:
+        embeddings = self._model.query_embed(queries, batch_size=batch_size, **kwargs)
+        return np.array(
+            list(tqdm(embeddings, total=len(queries), desc="Encoding queries"))
+        )
+
+    def __str__(self):
+        return f"MuveraFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
 
 
 class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
