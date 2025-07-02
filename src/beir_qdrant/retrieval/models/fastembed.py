@@ -61,7 +61,7 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
         return f"DenseFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
 
 
-class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
+class MuveraFastEmbedModelAdapter(DenseFastEmbedModelAdapter):
     """
     Adapter for the FastEmbed Muvera embedding models.
     """
