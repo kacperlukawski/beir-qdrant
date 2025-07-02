@@ -66,9 +66,7 @@ class MuveraFastEmbedModelAdapter(DenseFastEmbedModelAdapter):
     Adapter for the FastEmbed Muvera embedding models.
     """
 
-    def __init__(self, model_name: str, sep: str = ""):
-        super().__init__(sep=sep)
-
+    def __init__(self, model_name: str, sep: str = ""):  # noqa
         try:
             import torch
 
