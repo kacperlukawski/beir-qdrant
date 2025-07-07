@@ -66,7 +66,15 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
     Adapter for the FastEmbed Muvera embedding models.
     """
 
-    def __init__(self, model_name: str, sep: str = ""):  # noqa
+    def __init__(
+        self,
+        model_name: str,
+        sep: str = "",
+        *,
+        k_sim: int = 4,
+        d_proj: int = 32,
+        R_reps: int = 10,  # noqa
+    ):
         super().__init__(sep=sep)
 
         try:
@@ -74,9 +82,17 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
 
             use_cuda = torch.cuda.is_available()
             providers = ["CUDAExecutionProvider"] if use_cuda else None
-            self._model = MuveraEmbedding(model_name=model_name, providers=providers)
+            self._model = MuveraEmbedding(
+                model_name=model_name,
+                providers=providers,
+                k_sim=k_sim,
+                d_proj=d_proj,
+                R_reps=R_reps,
+            )
         except Exception:
-            self._model = MuveraEmbedding(model_name=model_name)
+            self._model = MuveraEmbedding(
+                model_name=model_name, k_sim=k_sim, d_proj=d_proj, R_reps=R_reps
+            )
 
     def encode_corpus(
         self,
