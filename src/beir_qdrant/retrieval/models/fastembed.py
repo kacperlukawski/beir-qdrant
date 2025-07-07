@@ -73,7 +73,8 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
         *,
         k_sim: int = 4,
         d_proj: int = 32,
-        R_reps: int = 10,  # noqa
+        R_reps: int = 10,
+        random_seed: int = 42,
     ):
         super().__init__(sep=sep)
 
@@ -88,10 +89,15 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
                 k_sim=k_sim,
                 d_proj=d_proj,
                 R_reps=R_reps,
+                random_seed=random_seed,
             )
         except Exception:
             self._model = MuveraEmbedding(
-                model_name=model_name, k_sim=k_sim, d_proj=d_proj, R_reps=R_reps
+                model_name=model_name,
+                k_sim=k_sim,
+                d_proj=d_proj,
+                R_reps=R_reps,
+                random_seed=random_seed,
             )
 
     def encode_corpus(
