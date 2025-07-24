@@ -38,7 +38,6 @@ class BaseModelAdapter(abc.ABC):
     def _format_corpus(
         self, corpus: Union[List[Dict[str, str]], Dict[str, List]]
     ) -> List[str]:
-        # TODO: check the logic and simplify, as this is derived from BeIR
         if type(corpus) is dict:
             return [
                 (corpus["title"][i] + self.sep + corpus["text"][i]).strip()
