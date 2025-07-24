@@ -15,7 +15,7 @@ python = "<3.13,>=3.10.0"
 beir = "^2.0.0,<2.1.0"
 fastembed = "^0.3.1"
 qdrant-client = "^1.10.0"
-transformers = "^4.43.3"
+transformers = "^4.43.3,<4.45.0"
 colbert-ai = "^0.2.20"
 fastembed-gpu = "^0.3.4"
 
