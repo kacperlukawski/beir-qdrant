@@ -5,11 +5,11 @@ import numpy as np
 import scipy as sp
 from fastembed import (
     LateInteractionTextEmbedding,
-    MuveraEmbedding,
     SparseEmbedding,
     SparseTextEmbedding,
     TextEmbedding,
 )
+from fastembed.postprocess import Muvera
 from torch import Tensor
 from tqdm import tqdm
 
@@ -72,8 +72,8 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
         sep: str = "",
         *,
         k_sim: int = 4,
-        d_proj: int = 32,
-        R_reps: int = 10,
+        dim_proj: int = 32,
+        r_reps: int = 10,
         random_seed: int = 42,
     ):
         super().__init__(sep=sep)
@@ -83,22 +83,19 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
 
             use_cuda = torch.cuda.is_available()
             providers = ["CUDAExecutionProvider"] if use_cuda else None
-            self._model = MuveraEmbedding(
+            self._model = LateInteractionTextEmbedding(
                 model_name=model_name,
                 providers=providers,
-                k_sim=k_sim,
-                d_proj=d_proj,
-                R_reps=R_reps,
-                random_seed=random_seed,
             )
         except Exception:
-            self._model = MuveraEmbedding(
-                model_name=model_name,
-                k_sim=k_sim,
-                d_proj=d_proj,
-                R_reps=R_reps,
-                random_seed=random_seed,
-            )
+            self._model = LateInteractionTextEmbedding(model_name=model_name)
+        self._postprocessor = Muvera.from_multivector_model(
+            self._model,
+            k_sim=k_sim,
+            dim_proj=dim_proj,
+            r_reps=r_reps,
+            random_seed=random_seed,
+        )
 
     def encode_corpus(
         self,
