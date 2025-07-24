@@ -2,7 +2,7 @@
 name = "beir-qdrant"
 version = "0.5.4"
 description = "Qdrant integration with BEIR, simplifying quality checks on standard datasets"
-authors = ["Kacper Łukawski <kacper.lukawski@qdrant.com>"]
+authors = ["Kacper Łukawski <kacper@qdrant.com>"]
 readme = "README.md"
 repository = "https://github.com/kacperlukawski/beir-qdrant"
 license = "Apache 2.0"
