@@ -17,8 +17,6 @@ from beir_qdrant.retrieval.search.sparse import SparseQdrantSearch
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
-# TODO: consider adding some test implementations of the models to lower the time of the tests
-
 
 @pytest.fixture(scope="session")
 def data_loader() -> GenericDataLoader:
