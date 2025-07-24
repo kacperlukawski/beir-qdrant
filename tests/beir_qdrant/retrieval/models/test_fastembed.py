@@ -15,7 +15,7 @@ def dense_model() -> DenseFastEmbedModelAdapter:
 
 @pytest.fixture(scope="session")
 def sparse_model() -> SparseFastEmbedModelAdapter:
-    return SparseFastEmbedModelAdapter("prithvida/SPLADE_PP_en_v1")
+    return SparseFastEmbedModelAdapter("prithivida/Splade_PP_en_v1")
 
 
 @pytest.fixture(scope="session")
