@@ -13,7 +13,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "<3.14,>=3.10.0"
 beir = "2.0.0"
-fastembed = {git = "https://github.com/qdrant/fastembed.git", rev = "feature/muvera-embedding"}
+fastembed = "^0.7.3"
 qdrant-client = "^1.13.0"
 transformers = "^4.43.3,<4.45.0"
 colbert-ai = "^0.2.20"
