@@ -99,8 +99,10 @@ class MuveraPostprocessorAdapter(BaseDenseModelAdapter):
         texts = self._format_corpus(corpus)
         embeddings = self._model.passage_embed(texts, batch_size=batch_size, **kwargs)
         return np.array(
-            self._postprocessor.process_document(emb)
-            for emb in tqdm(embeddings, total=len(texts), desc="Encoding corpus")
+            [
+                self._postprocessor.process_document(emb)
+                for emb in tqdm(embeddings, total=len(texts), desc="Encoding corpus")
+            ]
         )
 
     def encode_queries(
@@ -108,8 +110,10 @@ class MuveraPostprocessorAdapter(BaseDenseModelAdapter):
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
         embeddings = self._model.query_embed(queries, batch_size=batch_size, **kwargs)
         return np.array(
-            self._postprocessor.process_query(emb)
-            for emb in tqdm(embeddings, total=len(queries), desc="Encoding queries")
+            [
+                self._postprocessor.process_query(emb)
+                for emb in tqdm(embeddings, total=len(queries), desc="Encoding queries")
+            ]
         )
 
     def __str__(self):
