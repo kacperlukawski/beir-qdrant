@@ -2,6 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://kacperlukawski.github.io/beir-qdrant/</loc>
-         <lastmod>2024-09-26</lastmod>
+         <lastmod>2025-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://kacperlukawski.github.io/beir-qdrant/examples/</loc>
+         <lastmod>2025-09-01</lastmod>
     </url>
 </urlset>
