@@ -61,14 +61,14 @@ class DenseFastEmbedModelAdapter(BaseDenseModelAdapter):
         return f"DenseFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
 
 
-class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
+class MuveraPostprocessorAdapter(BaseDenseModelAdapter):
     """
-    Adapter for the FastEmbed Muvera embedding models.
+    Adapter for the FastEmbed Muvera postprocessor.
     """
 
     def __init__(
         self,
-        model_name: str,
+        model: LateInteractionTextEmbedding,
         sep: str = "",
         *,
         k_sim: int = 4,
@@ -77,18 +77,11 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
         random_seed: int = 42,
     ):
         super().__init__(sep=sep)
-
-        try:
-            import torch
-
-            use_cuda = torch.cuda.is_available()
-            providers = ["CUDAExecutionProvider"] if use_cuda else None
-            self._model = LateInteractionTextEmbedding(
-                model_name=model_name,
-                providers=providers,
-            )
-        except Exception:
-            self._model = LateInteractionTextEmbedding(model_name=model_name)
+        self._model = model
+        self.k_sim = k_sim
+        self.dim_proj = dim_proj
+        self.r_reps = r_reps
+        self.random_seed = random_seed
         self._postprocessor = Muvera.from_multivector_model(
             self._model,
             k_sim=k_sim,
@@ -106,7 +99,8 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
         texts = self._format_corpus(corpus)
         embeddings = self._model.passage_embed(texts, batch_size=batch_size, **kwargs)
         return np.array(
-            list(tqdm(embeddings, total=len(texts), desc="Encoding corpus"))
+            self._postprocessor.process_document(emb)
+            for emb in tqdm(embeddings, total=len(texts), desc="Encoding corpus")
         )
 
     def encode_queries(
@@ -114,11 +108,12 @@ class MuveraFastEmbedModelAdapter(BaseDenseModelAdapter):
     ) -> Union[List[Tensor], np.ndarray, Tensor]:
         embeddings = self._model.query_embed(queries, batch_size=batch_size, **kwargs)
         return np.array(
-            list(tqdm(embeddings, total=len(queries), desc="Encoding queries"))
+            self._postprocessor.process_query(emb)
+            for emb in tqdm(embeddings, total=len(queries), desc="Encoding queries")
         )
 
     def __str__(self):
-        return f"MuveraFastEmbedModelAdapter(model_name={self._model.model_name}, sep={self.sep})"
+        return f"MuveraPostprocessorAdapter(model_name={self._model.model_name}, sep={self.sep}, k_sim={self.k_sim}, dim_proj={self.dim_proj}, r_reps={self.r_reps}, random_seed={self.random_seed})"
 
 
 class SparseFastEmbedModelAdapter(BaseSparseModelAdapter):
