@@ -9,6 +9,9 @@ from fastembed import (
     SparseTextEmbedding,
     TextEmbedding,
 )
+from fastembed.late_interaction.late_interaction_embedding_base import (
+    LateInteractionTextEmbeddingBase,
+)
 from fastembed.postprocess import Muvera
 from torch import Tensor
 from tqdm import tqdm
@@ -68,7 +71,7 @@ class MuveraPostprocessorAdapter(BaseDenseModelAdapter):
 
     def __init__(
         self,
-        model: LateInteractionTextEmbedding,
+        model: LateInteractionTextEmbeddingBase,
         sep: str = "",
         *,
         k_sim: int = 4,
