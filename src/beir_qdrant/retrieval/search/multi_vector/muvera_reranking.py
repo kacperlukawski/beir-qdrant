@@ -164,7 +164,9 @@ class MuveraReranking(QdrantBase):
                     using="muvera",
                     limit=limit * self.oversample_factor,  # Oversample
                 ),
-                query=multivector_query_emb,  # Multivector for final ranking
+                query=[
+                    vector.tolist() for vector in multivector_query_emb
+                ],  # Multivector for final ranking
                 using="multivector",
                 limit=limit,  # Final top_k results
                 with_payload=True,
