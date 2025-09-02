@@ -4,7 +4,7 @@ site_description: Qdrant integration with BEIR, simplifying quality checks on st
 repo_url: https://github.com/kacperlukawski/beir-qdrant
 nav:
   - Home: index.md
-  - Examples: examples.md
+  - Muvera: muvera.md
 #  - Home: index.md
 #  - Quickstart: quickstart.md
 #  - Usage: usage.md
