@@ -17,7 +17,7 @@ fastembed = "^0.7.3"
 qdrant-client = "^1.13.0"
 transformers = "^4.43.3,<4.45.0"
 colbert-ai = "^0.2.20"
-fastembed-gpu = "^0.7.1"
+fastembed-gpu = "^0.7.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
