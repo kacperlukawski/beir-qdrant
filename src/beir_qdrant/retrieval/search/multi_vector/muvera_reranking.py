@@ -93,7 +93,7 @@ class MuveraReranking(QdrantBase):
                     size=multivector_size,
                     distance=models.Distance.COSINE,
                     # Disable HNSW for multivectors
-                    hnsw_config=models.HnswConfigDiff(full_scan_threshold=0),
+                    hnsw_config=models.HnswConfigDiff(m=0),
                     multivector_config=models.MultiVectorConfig(
                         comparator=models.MultiVectorComparator.MAX_SIM
                     ),
