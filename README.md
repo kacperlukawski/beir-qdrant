@@ -59,3 +59,4 @@ Qdrant supports different search modes, including:
 - Sparse search: `beir_qdrant.retrieval.search.sparse.SparseQdrantSearch`
 - Multi vector search: `beir_qdrant.retrieval.search.multi_vector.MultiVectorQdrantSearch`
 - Hybrid search with RRF: `beir_qdrant.retrieval.search.hybrid.RRFHybridQdrantSearch`
+- Muvera postprocessing for multi vector search: `beir_qdrant.retrieval.models.fastembed.MuveraPostprocessorAdapter`
